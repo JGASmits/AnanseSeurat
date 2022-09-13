@@ -186,28 +186,22 @@ config_scANANSE <- function(seurat_object,
     additional_contrasts <- paste0('anansesnake_',additional_contrasts)
     contrast_list = c(contrast_list,additional_contrasts)}
   
-  cat(paste0("rna_samples: ",sample_file_location),
-      file=paste0(output_dir,"/config.yaml"),sep="\n")
-  cat(paste0("rna_tpms: ",CPM_file,'\n'),
-      file=paste0(output_dir,"/config.yaml"),append = T)
-  cat(paste0("rna_counts: ",count_file,'\n'),
-      file=paste0(output_dir,"/config.yaml"),append = T)
-  cat(paste0("atac_samples: ",sample_file_location,'\n'),
-      file=paste0(output_dir,"/config.yaml"),append = T)
-  cat(paste0("atac_counts: ",Peak_file,'\n'),
-      file=paste0(output_dir,"/config.yaml"),append = T)
-  cat("genome: hg38 \n",file=paste0(output_dir,"/config.yaml"),append = T)
-  cat(paste0("result_dir: ",output_dir, '\n'),file=paste0(output_dir,"/config.yaml"),append = T)
-  cat("contrasts: \n",file=paste0(output_dir,"/config.yaml"),append = T)
+  file=paste0(output_dir,"/config.yaml")
+  
+  lines= c("genome: hg38 \n",
+    "database: gimme.vertebrate.v5.0 \n",
+    "jaccard: 0.1 \n",
+    "edges: 500_000 \n",
+    "padj: 0.05 \n",
+    'plot_type: "png" \n',
+    "get_orthologs: false \n",
+    "contrasts: \n")
+  
+  string= paste(lines, collapse = '')
+  cat(string,file=paste0(output_dir,"/config.yaml"),append = T)
   for (contr in contrast_list){
-    #print(contr)
     cat(paste0('  - "',contr, '"'),"\n",file=paste0(output_dir,"/config.yaml"),append = T)
   }
-  cat("database: gimme.vertebrate.v5.0 \n",file=paste0(output_dir,"/config.yaml"),append = T)
-  cat("jaccard: 0.1 \n",file=paste0(output_dir,"/config.yaml"),append = T)
-  cat("edges: 500_000 \n",file=paste0(output_dir,"/config.yaml"),append = T)
-  cat("padj: 0.05 \n",file=paste0(output_dir,"/config.yaml"),append = T)
-  cat('plot_type: "png" \n',file=paste0(output_dir,"/config.yaml"),append = T)
   }
 
 #' DEGS_scANANSE
