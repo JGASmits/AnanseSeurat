@@ -143,7 +143,8 @@ config_scANANSE <- function(seurat_object,
                                    min_cells = 50,
                                    output_dir = '~/',
                                    cluster_id = 'seurat_clusters',
-                                   additional_contrasts = 'None'
+                                   additional_contrasts = 'None',
+                                   RNA_count_assay = "RNA"
 ) {
   dir.create(file.path(output_dir))
   Idents(seurat_object) <- cluster_id
@@ -165,8 +166,9 @@ config_scANANSE <- function(seurat_object,
     n_cells <- dim(seurat_object_cluster)[2]
     if (n_cells > min_cells){
       cluster_names[i] <- cluster
+      i = i +1
     }}
-  
+
   #lets generate the snakemake sample file
   sample_names <- c(cluster_names, 'average')
   sample_file_df <- as.data.frame(sample_names)
@@ -198,9 +200,11 @@ config_scANANSE <- function(seurat_object,
     "contrasts: \n")
   
   string= paste(lines, collapse = '')
-  cat(string,file=paste0(output_dir,"/config.yaml"),append = T)
+  cat(string,file=paste0(output_dir,"/config.yaml"),append = F)
+  
   for (contr in contrast_list){
     cat(paste0('  - "',contr, '"'),"\n",file=paste0(output_dir,"/config.yaml"),append = T)
+    print(contr)
   }
   }
 
