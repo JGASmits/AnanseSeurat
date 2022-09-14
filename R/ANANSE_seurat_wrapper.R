@@ -190,7 +190,13 @@ config_scANANSE <- function(seurat_object,
   
   file=paste0(output_dir,"/config.yaml")
   
-  lines= c("genome: hg38 \n",
+  lines= c(
+    paste0("rna_samples: ",sample_file_location,'\n'),
+    paste0("rna_tpms: ",CPM_file,'\n'),
+    paste0("rna_counts: ",count_file,'\n'),
+    paste0("atac_samples: ",sample_file_location,'\n'),
+    paste0("atac_counts: ",Peak_file,'\n'),
+    "genome: hg38 \n",
     "database: gimme.vertebrate.v5.0 \n",
     "jaccard: 0.1 \n",
     "edges: 500_000 \n",
