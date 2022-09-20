@@ -229,7 +229,10 @@ DEGS_scANANSE <- function(seurat_object,
                                       cluster_id = 'seurat_clusters',
                                       additional_contrasts = 'None'
 ) {
-  dir.create(file.path(output_dir))
+  #Create a results directory if it does not exist yet
+  if (file.exists(paste0(output_dir,'/deseq2/'))==FALSE){
+    dir.create(file.path(paste0(output_dir,'/deseq2/')))
+  }
   Idents(seurat_object) <- cluster_id
   cluster_names = list()
   i = 1
@@ -239,6 +242,7 @@ DEGS_scANANSE <- function(seurat_object,
     n_cells <- dim(seurat_object_cluster)[2]
     if (n_cells > min_cells){
       cluster_names[i] <- cluster
+      i = i+1 # Increase i to add clusters iteratively to the cluster_names list
     }}
   
   #lets generate the snakemake config file
@@ -246,9 +250,6 @@ DEGS_scANANSE <- function(seurat_object,
   if (type(additional_contrasts) == 'list'){print('adding additional contrasts')
     additional_contrasts <- paste0('anansesnake_',additional_contrasts)
     contrast_list = c(contrast_list,additional_contrasts)}
-   
-  #lets calculate all the DEGs for the provided contrasts
-  dir.create(file.path(paste0(output_dir,'/deseq2/')))
   
   for (contr in contrast_list){
     print(paste0('calculating DEGS for contrast ',contr))
