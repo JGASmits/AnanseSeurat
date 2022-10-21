@@ -193,6 +193,7 @@ config_scANANSE <- function(seurat_object,
   file=paste0(output_dir,"/config.yaml")
   
   lines= c(
+    paste0("result_dir: ",output_dir,'\n'),
     paste0("rna_samples: ",sample_file_location,'\n'),
     paste0("rna_tpms: ",CPM_file,'\n'),
     paste0("rna_counts: ",count_file,'\n'),
