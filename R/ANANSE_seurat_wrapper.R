@@ -144,7 +144,7 @@ config_scANANSE <- function(seurat_object,
                                    min_cells = 50,
                                    output_dir = '~/',
                                    cluster_id = 'seurat_clusters',
-                                   genome = 'hg38',
+                                   genome = './scANANSE/data/hg38',
                                    additional_contrasts = 'None',
                                    RNA_count_assay = "RNA"
 ) {
@@ -169,7 +169,7 @@ config_scANANSE <- function(seurat_object,
   sample_file_df <- as.data.frame(sample_names)
   sample_file_df <- as.data.frame(t(sample_file_df))
   colnames(sample_file_df) <- 'sample'
-  sample_file_df$assembly <- genome
+  sample_file_df$assembly <- basename(genome)
   sample_file_df$anansesnake <- sample_file_df$sample
   sample_file_location <- paste0(output_dir,"/samplefile.tsv")
   
