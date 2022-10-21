@@ -149,14 +149,7 @@ config_scANANSE <- function(seurat_object,
                                    RNA_count_assay = "RNA"
 ) {
   dir.create(file.path(output_dir))
-  Idents(seurat_object) <- cluster_id
-  print('calculating CPM')
-  seurat_object <- NormalizeData(seurat_object, 
-                                 assay  = RNA_count_assay, 
-                                 normalization.method = 'RC', 
-                                 scale.factor = 1e6
-  )
-  
+  Idents(seurat_object) <- cluster_id 
   Peak_file <-paste(output_dir, "Peak_Counts.tsv", sep = '/')
   count_file <- paste(output_dir, "RNA_Counts.tsv", sep = '/')
   CPM_file <-paste(output_dir, "TPM.tsv", sep = '/')
