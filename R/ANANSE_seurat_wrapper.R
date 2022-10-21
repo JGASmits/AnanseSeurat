@@ -136,6 +136,7 @@ export_ATAC_scANANSE <- function(seurat_object,
 #' @param seurat object
 #' @param min_cells: minimum of cells a cluster needs to be exported
 #' @param output_dir: directory where the files are outputted
+#' @param genome: genomepy name or location of the genome fastq file
 #' @param cluster_id: ID used for finding clusters of cells
 #' @param additional_contrasts: additional contrasts to add between clusters within cluster_ID
 #' @export
@@ -143,6 +144,7 @@ config_scANANSE <- function(seurat_object,
                                    min_cells = 50,
                                    output_dir = '~/',
                                    cluster_id = 'seurat_clusters',
+                                   genome = 'hg38',
                                    additional_contrasts = 'None',
                                    RNA_count_assay = "RNA"
 ) {
@@ -174,7 +176,7 @@ config_scANANSE <- function(seurat_object,
   sample_file_df <- as.data.frame(sample_names)
   sample_file_df <- as.data.frame(t(sample_file_df))
   colnames(sample_file_df) <- 'sample'
-  sample_file_df$assembly <- 'hg38'
+  sample_file_df$assembly <- genome
   sample_file_df$anansesnake <- sample_file_df$sample
   sample_file_location <- paste0(output_dir,"/samplefile.tsv")
   
@@ -196,7 +198,7 @@ config_scANANSE <- function(seurat_object,
     paste0("rna_counts: ",count_file,'\n'),
     paste0("atac_samples: ",sample_file_location,'\n'),
     paste0("atac_counts: ",Peak_file,'\n'),
-    "genome: hg38 \n",
+    paste0("genome: ",genome, "\n"),
     "database: gimme.vertebrate.v5.0 \n",
     "jaccard: 0.1 \n",
     "edges: 500_000 \n",
