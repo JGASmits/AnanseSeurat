@@ -13,7 +13,7 @@ export_CPM_scANANSE <- function(seurat_object,
                                    RNA_count_assay = "RNA",
                                    cluster_id = 'seurat_clusters'
 ) {
-  dir.create(file.path(output_dir))
+  dir.create(file.path(output_dir),showWarnings = FALSE)
   Idents(seurat_object) <- cluster_id
   print('calculating CPM')
   seurat_object <- NormalizeData(seurat_object, 
@@ -90,7 +90,7 @@ export_ATAC_scANANSE <- function(seurat_object,
                                    ATAC_peak_assay = "peaks",
                                    cluster_id = 'seurat_clusters'
 ) {
-  dir.create(file.path(output_dir))
+  dir.create(file.path(output_dir),showWarnings = FALSE)
   Idents(seurat_object) <- cluster_id
   
   peak_count_lists = list()
@@ -148,7 +148,7 @@ config_scANANSE <- function(seurat_object,
                                    additional_contrasts = 'None',
                                    RNA_count_assay = "RNA"
 ) {
-  dir.create(file.path(output_dir))
+  dir.create(file.path(output_dir), showWarnings = FALSE)
   Idents(seurat_object) <- cluster_id 
   Peak_file <-paste(output_dir, "Peak_Counts.tsv", sep = '/')
   count_file <- paste(output_dir, "RNA_Counts.tsv", sep = '/')
@@ -225,10 +225,8 @@ DEGS_scANANSE <- function(seurat_object,
                                       cluster_id = 'seurat_clusters',
                                       additional_contrasts = 'None'
 ) {
-  #Create a results directory if it does not exist yet
-  if (file.exists(paste0(output_dir,'/deseq2/'))==FALSE){
-    dir.create(file.path(paste0(output_dir,'/deseq2/')))
-  }
+  #Create a results directory
+  dir.create(file.path(paste0(output_dir,'/deseq2/')),showWarnings = FALSE)
   Idents(seurat_object) <- cluster_id
   cluster_names = list()
   i = 1
