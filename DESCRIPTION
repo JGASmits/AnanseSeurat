@@ -1,4 +1,4 @@
-Package: AnanseSeuratWrapper
+Package: AnanseSeurat
 Title: Export data from seurat object to run Ananse 
 Version: 0.0.1.0000
 Authors@R: 
