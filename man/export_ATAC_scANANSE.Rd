@@ -13,15 +13,15 @@ export_ATAC_scANANSE(
 )
 }
 \arguments{
-\item{seurat}{object}
+\item{seurat_object}{object}
 
-\item{min_cells:}{minimum of cells a cluster needs to be exported}
+\item{min_cells}{minimum of cells a cluster needs to be exported}
 
-\item{output_dir:}{directory where the files are outputted}
+\item{output_dir}{directory where the files are outputted}
 
-\item{ATAC_peak_assay:}{assay of the seurat object containing the peaks and peakcounts}
+\item{ATAC_peak_assay}{assay of the seurat object containing the peaks and peakcounts}
 
-\item{cluster_id:}{ID used for finding clusters of cells}
+\item{cluster_id}{ID used for finding clusters of cells}
 }
 \description{
 This functions exports ATAC values from a seurat object

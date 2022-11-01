@@ -13,15 +13,15 @@ DEGS_scANANSE(
 )
 }
 \arguments{
-\item{seurat}{object}
+\item{seurat_object}{seurat object}
 
-\item{min_cells:}{minimum of cells a cluster needs to be exported}
+\item{min_cells}{minimum of cells a cluster needs to be exported}
 
-\item{output_dir:}{directory where the files are outputted}
+\item{output_dir}{directory where the files are outputted}
 
-\item{cluster_id:}{ID used for finding clusters of cells}
+\item{cluster_id}{ID used for finding clusters of cells}
 
-\item{additional_contrasts:}{additional contrasts to add between clusters within cluster_ID}
+\item{additional_contrasts}{additional contrasts to add between clusters within cluster_ID}
 }
 \description{
 Calculate the differential genes needed for ananse influence

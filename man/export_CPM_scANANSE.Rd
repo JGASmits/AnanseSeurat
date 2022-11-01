@@ -13,15 +13,18 @@ export_CPM_scANANSE(
 )
 }
 \arguments{
-\item{seurat}{object}
+\item{seurat_object}{the seurat object used to export the CPM values from}
 
-\item{min_cells:}{minimum of cells a cluster needs to be exported}
+\item{min_cells}{minimum of cells a cluster needs to be exported}
 
-\item{output_dir:}{directory where the files are outputted}
+\item{output_dir}{directory where the files are outputted}
 
-\item{RNA_count_assay:}{assay of the seurat object containing the RNA count data}
+\item{RNA_count_assay}{assay of the seurat object containing the RNA count data}
 
-\item{cluster_id:}{ID used for finding clusters of cells}
+\item{cluster_id}{ID used for finding clusters of cells}
+}
+\value{
+CPM and count files
 }
 \description{
 This functions exports CPM values from a seurat object
