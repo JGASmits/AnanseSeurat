@@ -14,4 +14,5 @@ Imports:
     dplyr,
     purrr,
     stringr,
-    magrittr
+    magrittr,
+    utils

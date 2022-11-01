@@ -15,9 +15,9 @@ export_CPM_scANANSE <- function(seurat_object,
                                    cluster_id = 'seurat_clusters'
 ) {
   dir.create(file.path(output_dir),showWarnings = FALSE)
-  Idents(seurat_object) <- cluster_id
+  Seurat::Idents(seurat_object) <- cluster_id
   print('calculating CPM')
-  seurat_object <- NormalizeData(seurat_object,
+  seurat_object <- Seurat::NormalizeData(seurat_object,
                                  assay  = RNA_count_assay,
                                  normalization.method = 'RC',
                                  scale.factor = 1e6
@@ -26,7 +26,7 @@ export_CPM_scANANSE <- function(seurat_object,
   FPKM_count_lists = list()
   cluster_names = list()
   i = 1
-  for (cluster in levels(Idents(seurat_object))){
+  for (cluster in levels(Seurat::Idents(seurat_object))){
     seurat_object_cluster <- subset(x = seurat_object, idents = cluster)
     #only use ANANSE on clusters with more than 50 cells
     n_cells <- dim(seurat_object_cluster)[2]
@@ -72,8 +72,8 @@ export_CPM_scANANSE <- function(seurat_object,
   count_file <- paste(output_dir, "RNA_Counts.tsv", sep = '/')
   CPM_file <-paste(output_dir, "TPM.tsv", sep = '/')
 
-  write.table(count_matrix, count_file, sep = '\t', quote = F)
-  write.table(FPKM_matrix, CPM_file, sep = '\t', quote = F)
+  utils::write.table(count_matrix, count_file, sep = '\t', quote = F)
+  utils::write.table(FPKM_matrix, CPM_file, sep = '\t', quote = F)
   return('done exporting cluster data files')
 }
 #' export_ATAC_scANANSE
@@ -92,12 +92,12 @@ export_ATAC_scANANSE <- function(seurat_object,
                                    cluster_id = 'seurat_clusters'
 ) {
   dir.create(file.path(output_dir),showWarnings = FALSE)
-  Idents(seurat_object) <- cluster_id
+  Seurat::Idents(seurat_object) <- cluster_id
 
   peak_count_lists = list()
   cluster_names = list()
   i = 1
-  for (cluster in levels(Idents(seurat_object))){
+  for (cluster in levels(Seurat::Idents(seurat_object))){
     seurat_object_cluster <- subset(x = seurat_object, idents = cluster)
     #only use ANANSE on clusters with more than 50 cells
     n_cells <- dim(seurat_object_cluster)[2]
@@ -128,7 +128,7 @@ export_ATAC_scANANSE <- function(seurat_object,
   activity_matrix$average <- round(rowMeans(activity_matrix))
 
   Peak_file <-paste(output_dir, "Peak_Counts.tsv", sep = '/')
-  write.table(activity_matrix, Peak_file, sep = '\t', quote = F)
+  utils::write.table(activity_matrix, Peak_file, sep = '\t', quote = F)
 }
 
 #' config_scANANSE
@@ -149,13 +149,13 @@ config_scANANSE <- function(seurat_object,
                                    additional_contrasts = 'None'
 ) {
   dir.create(file.path(output_dir), showWarnings = FALSE)
-  Idents(seurat_object) <- cluster_id
+  Seurat::Idents(seurat_object) <- cluster_id
   Peak_file <-paste(output_dir, "Peak_Counts.tsv", sep = '/')
   count_file <- paste(output_dir, "RNA_Counts.tsv", sep = '/')
   CPM_file <-paste(output_dir, "TPM.tsv", sep = '/')
   cluster_names = list()
   i = 1
-  for (cluster in levels(Idents(seurat_object))){
+  for (cluster in levels(Seurat::Idents(seurat_object))){
     seurat_object_cluster <- subset(x = seurat_object, idents = cluster)
     #only use ANANSE on clusters with more than 50 cells
     n_cells <- dim(seurat_object_cluster)[2]
@@ -173,13 +173,13 @@ config_scANANSE <- function(seurat_object,
   sample_file_df$anansesnake <- sample_file_df$sample
   sample_file_location <- paste0(output_dir,"/samplefile.tsv")
 
-  write.table(sample_file_df,sample_file_location,
+  utils::write.table(sample_file_df,sample_file_location,
               sep='\t',
               row.names = FALSE,
               quote = F)
   #lets generate the snakemake config file
   contrast_list <- as.list(paste0('anansesnake_',cluster_names,'_average'))
-  if (type(additional_contrasts) == 'list'){print('adding additional contrasts')
+  if (typeof(additional_contrasts) == 'list'){print('adding additional contrasts')
     additional_contrasts <- paste0('anansesnake_',additional_contrasts)
     contrast_list = c(contrast_list,additional_contrasts)}
 
@@ -218,7 +218,6 @@ config_scANANSE <- function(seurat_object,
 #' @param output_dir directory where the files are outputted
 #' @param cluster_id ID used for finding clusters of cells
 #' @param additional_contrasts additional contrasts to add between clusters within cluster_ID
-#' @importFrom Seurat Idents
 #' @export
 DEGS_scANANSE <- function(seurat_object,
                                       min_cells = 50,
@@ -228,10 +227,10 @@ DEGS_scANANSE <- function(seurat_object,
 ) {
   #Create a results directory
   dir.create(file.path(paste0(output_dir,'/deseq2/')),showWarnings = FALSE)
-  Idents(seurat_object) <- cluster_id
+  Seurat::Idents(seurat_object) <- cluster_id
   cluster_names = list()
   i = 1
-  for (cluster in levels(Idents(seurat_object))){
+  for (cluster in levels(Seurat::Idents(seurat_object))){
     seurat_object_cluster <- subset(x = seurat_object, idents = cluster)
     #only use ANANSE on clusters with more than 50 cells
     n_cells <- dim(seurat_object_cluster)[2]
@@ -242,26 +241,26 @@ DEGS_scANANSE <- function(seurat_object,
 
   #lets generate the snakemake config file
   contrast_list <- as.list(paste0('anansesnake_',cluster_names,'_average'))
-  if (type(additional_contrasts) == 'list'){print('adding additional contrasts')
+  if (typeof(additional_contrasts) == 'list'){print('adding additional contrasts')
     additional_contrasts <- paste0('anansesnake_',additional_contrasts)
     contrast_list = c(contrast_list,additional_contrasts)}
 
   for (contr in contrast_list){
     print(paste0('calculating DEGS for contrast ',contr))
-    comparison1 <- str_split(contr, "_")[[1]][2]
-    comparison2 <- str_split(contr, "_")[[1]][3]
+    comparison1 <- stringr::str_split(contr, "_")[[1]][2]
+    comparison2 <- stringr::str_split(contr, "_")[[1]][3]
 
     DEG_file <- paste0(output_dir,'/deseq2/','hg38-anansesnake_',comparison1,'_', comparison2,'.diffexp.tsv')
 
     if (file.exists(DEG_file)){print('skip')} else {
 
       if (comparison2 == 'average'){
-        DEGS <- FindMarkers(seurat_object,
+        DEGS <- Seurat::FindMarkers(seurat_object,
                             ident.1 = comparison1,
                             logfc.threshold = 0.1,
                             min.pct = 0.05,
                             return.thresh = 0.1)
-      }else{DEGS <- FindMarkers(seurat_object,
+      }else{DEGS <- Seurat::FindMarkers(seurat_object,
                                 ident.1 = comparison1,
                                 ident.2 = comparison2,
                                 logfc.threshold = 0.1,
@@ -269,7 +268,7 @@ DEGS_scANANSE <- function(seurat_object,
                                 return.thresh = 0.1)}
       DEGS <- DEGS[c('avg_log2FC','p_val_adj')]
       colnames(DEGS) <- c('log2FoldChange','padj')
-      write.table(DEGS,DEG_file, sep = '\t', quote = F)
+      utils::write.table(DEGS,DEG_file, sep = '\t', quote = F)
     }
   }
 }
@@ -298,7 +297,7 @@ import_seurat_scANANSE <- function(seurat_object,
     cell_target <- stringr::str_split(basename(file),"_")[[1]][2]
     cell_source <- stringr::str_split(basename(file),"_")[[1]][3]
     cell_source <- stringr::str_replace(cell_source,'.tsv','')
-    in_df <- read.table(file, header = T)
+    in_df <- utils::read.table(file, header = T)
     in_df <- in_df[c('factor','influence_score')]
     colnames(in_df) <- c('factor',cell_target)
     if (cell_source == 'average'){
@@ -331,7 +330,7 @@ import_seurat_scANANSE <- function(seurat_object,
   TF_array <- do.call("rbind", cell_signal_list)
 
   #add cell IDs that do not have ANANSE signal and give them a NA vallue
-  cell_barcodes_all <- rownames(as.data.frame(Idents(object = seurat_object)))
+  cell_barcodes_all <- rownames(as.data.frame(Seurat::Idents(object = seurat_object)))
   cell_barcodes_missing <- cell_barcodes_all[!cell_barcodes_all %in% rownames(TF_array)]
   cell_barcodes_missing <- as.data.frame(cell_barcodes_missing)
   for (TF in colnames(TF_signal)){
@@ -342,6 +341,6 @@ import_seurat_scANANSE <- function(seurat_object,
 
   TF_output <- t(rbind(TF_array,cell_barcodes_missing))
 
-  seurat_object[['ANANSE']] <- TF_output %>% Seurat::CreateAssayObject(.)
+  seurat_object[['ANANSE']] <- Seurat::CreateAssayObject(TF_output)
   return(list(seurat_object,avg_df))
 }
