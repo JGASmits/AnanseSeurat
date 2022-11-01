@@ -120,7 +120,7 @@ export_ATAC_scANANSE <- function(seurat_object,
   colnames(activity_matrix) <- cluster_names
   #output the peaks as a bed file:
   peaks <- rownames(mat)
-  peaks <- str_split_fixed(peaks, '-', 3)
+  peaks <- stringr::str_split_fixed(peaks, '-', 3)
   peaknames <- paste0(peaks[,1],":",peaks[,2],'-',peaks[,3])
   rownames(activity_matrix) <- peaknames
   activity_matrix <- as.data.frame(activity_matrix)
