@@ -5,7 +5,7 @@ Authors@R:
     person("Jos", "Smits", , "JSmits@science.ru.nl", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5858-3905"))
 Description: Export data from seurat object to run Ananse GRN prediciton.
-License: MIT + file LICENSE
+License: MIT
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
