@@ -454,3 +454,7 @@ import_seurat_Maelstrom <- function(seurat_object,
   seurat_object[['Maelstrom']] <- Seurat::CreateAssayObject(t(TF_array))
   return(list(seurat_object,motif_df))
 }
+
+######################################################
+### Make correlated motif-TF matrices for plotting ###
+######################################################
