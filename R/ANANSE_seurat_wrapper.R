@@ -225,8 +225,6 @@ DEGS_scANANSE <- function(seurat_object,
                                       cluster_id = 'seurat_clusters',
                                       additional_contrasts = 'None'
 ) {
-  #Create a results directory
-  dir.create(file.path(paste0(output_dir,'/deseq2/')),showWarnings = FALSE)
   Seurat::Idents(seurat_object) <- cluster_id
   cluster_names = list()
   i = 1
