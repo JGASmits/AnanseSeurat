@@ -284,7 +284,6 @@ import_seurat_scANANSE <- function(seurat_object,
                                    cluster_id = 'seurat_clusters',
                                    anansnake_inf_dir = 'None'
 ){
-  dir.create(file.path(output_dir),showWarnings = FALSE)
   Seurat::Idents(seurat_object) <- cluster_id
   peak_count_lists = list()
   cluster_names = list()
