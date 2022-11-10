@@ -284,69 +284,55 @@ import_seurat_scANANSE <- function(seurat_object,
                                    cluster_id = 'seurat_clusters',
                                    anansnake_inf_dir = 'None'
 ){
-
-  files <- list.files(path=anansnake_inf_dir, pattern="*.tsv", full.names=TRUE, recursive=FALSE)
-  GRN_files <- list.files(path=anansnake_inf_dir, pattern="_diffnetwork.tsv", full.names=TRUE, recursive=FALSE)
-  files <- files[!files %in% GRN_files]
-
-  influence_scores_avg = list()
-  influence_targets = list()
+  dir.create(file.path(output_dir),showWarnings = FALSE)
+  Seurat::Idents(seurat_object) <- cluster_id
+  peak_count_lists = list()
+  cluster_names = list()
   i = 1
-
-  for (file in files){
-    cell_target <- stringr::str_split(basename(file),"_")[[1]][2]
-    cell_source <- stringr::str_split(basename(file),"_")[[1]][3]
-    cell_source <- stringr::str_replace(cell_source,'.tsv','')
-    in_df <- utils::read.table(file, header = T)
-    in_df <- in_df[c('factor','influence_score')]
-    colnames(in_df) <- c('factor',cell_target)
-    if (cell_source == 'average'){
-      influence_scores_avg[[i]] <- as.data.frame(in_df)
-      influence_targets[[i]] = cell_target
+  for (cluster in levels(Seurat::Idents(seurat_object))){
+    seurat_object_cluster <- subset(x = seurat_object, idents = cluster)
+    #only use ANANSE on clusters with more than 50 cells
+    n_cells <- dim(seurat_object_cluster)[2]
+    if (n_cells > min_cells){
+      print(paste0('gather data from ', cluster, ' with ', n_cells, ' cells'))
+      cluster_names[i] <- cluster
+      #lets grab the ATAC signal
+      mat <- seurat_object_cluster@assays[[ATAC_peak_assay]]@counts
+      mat <- as.matrix(rowSums(as.matrix(mat)))
+      colnames(mat) <- cluster
+      peak_count_lists[i] <- as.data.frame(mat)
       i = i + 1
-    }
+    }else{print(paste0(cluster,' less than ',min_cells,' skipping'))}
   }
-
-  avg_df <- influence_scores_avg %>% purrr::reduce(dplyr::full_join, by = "factor", copy = T)
-  avg_df[is.na(avg_df)] = 0
-  rownames(avg_df) <- avg_df$factor
-  avg_df$factor <- NULL
-
-  #add the TF intensities to the seurat object
-  TF_df <- t(avg_df)
-  cell_signal_list <- list()
-  i = 1
-  #get cell IDs from the pbmcs
-  for (cell_type in rownames(TF_df)){
-    cells_in_seurat <- seurat_object[[cluster_id]] ==cell_type
-    if (TRUE %in% cells_in_seurat){
-      relevant_IDS <- seurat_object[,seurat_object[[cluster_id]] ==cell_type][[cluster_id]]
-      TF_signal <- TF_df[rownames(TF_df) == cell_type,]
-      TF_signal <- as.data.frame(TF_signal)
-      TF_signal <- t(TF_signal)
-      TF_signal <- TF_signal[rep(seq_len(nrow(TF_signal)), each = nrow(relevant_IDS)), ]
-      rownames(TF_signal) <- rownames(as.data.frame(relevant_IDS))
-      cell_signal_list[[i]] <- TF_signal}else{print(paste0(paste0('no cells of id ',cell_type),' found in seurat object'))}
-    i = i + 1
-  }
-  TF_array <- do.call("rbind", cell_signal_list)
-
-  #add cell IDs that do not have ANANSE signal and give them a NA vallue
-  cell_barcodes_all <- rownames(as.data.frame(Seurat::Idents(object = seurat_object)))
-  cell_barcodes_missing <- cell_barcodes_all[!cell_barcodes_all %in% rownames(TF_array)]
-  cell_barcodes_missing <- as.data.frame(cell_barcodes_missing)
-  for (TF in colnames(TF_signal)){
-    cell_barcodes_missing[[TF]] <- NA
-  }
-  rownames(cell_barcodes_missing) <- cell_barcodes_missing$cell_barcodes_missing
-  cell_barcodes_missing$cell_barcodes_missing <- NULL
-
-  TF_output <- t(rbind(TF_array,cell_barcodes_missing))
-
-  seurat_object[['ANANSE']] <- Seurat::CreateAssayObject(TF_output)
-  return(list(seurat_object,avg_df))
+  #ATAC peak matrix
+  activity_matrix <- do.call(rbind, peak_count_lists)
+  activity_matrix <- as.data.frame(activity_matrix)
+  activity_matrix <- t(activity_matrix)
+  colnames(activity_matrix) <- cluster_names
+  #output the peaks as a bed file:
+  peaks <- rownames(mat)
+  peaks <- stringr::str_split_fixed(peaks, '-', 3)
+  peaknames <- paste0(peaks[,1],":",peaks[,2],'-',peaks[,3])
+  rownames(activity_matrix) <- peaknames
+  activity_matrix <- as.data.frame(activity_matrix)
+  activity_matrix <- log2(activity_matrix + 1)
+  activity_matrix <- scale(activity_matrix)
+  activity_matrix <- as.data.frame(activity_matrix)
+  print(nrow(activity_matrix))
+  if (select_top_rows){
+    if (nrow(activity_matrix)>n_top_rows){
+      print(paste0('large dataframe detected, selecting top variable rows n = ',n_top_rows))
+      print('if entire dataframe is required, add select_top_rows = False as a parameter')
+      print('or change ammount of rows via the n_top_rows parameter')
+      row_variance <- apply(activity_matrix, 1, var)
+      activity_matrix$RowVar <-row_variance
+      activity_matrix <-activity_matrix[order(activity_matrix$RowVar, decreasing = T),]
+      activity_matrix <- head(activity_matrix,n_top_rows)
+      activity_matrix$RowVar <- NULL
+    }}
+  Peak_file <-paste(output_dir, "Peaks_scaled.tsv", sep = '/')
+  utils::write.table(activity_matrix, col.names = NA, row.names = TRUE, Peak_file, sep = '\t', quote = F)
 }
-
 #' export_seurat_Maelstrom
 #'
 #' normalize and export the peak table of a seurat object based on clusters
@@ -428,12 +414,10 @@ import_seurat_Maelstrom <- function(seurat_object,
                                     cluster_id = 'seurat_clusters',
                                     Maelstrom_dir = ''
 ){
-
   maelstrom_file <- paste0(Maelstrom_dir,"final.out.txt")
   maelstrom_df <- utils::read.table(maelstrom_file, header = T,row.names=1, sep = '\t',check.names=FALSE)
   maelstrom_Zscore <- maelstrom_df[grep("z-score ", colnames(maelstrom_df))]
   maelstrom_corr <- maelstrom_df[grep("corr ", colnames(maelstrom_df))]
-
   #add the motif intensities to the seurat object
   motif_df <- t(maelstrom_Zscore)
   cell_signal_list <- list()
@@ -451,23 +435,25 @@ import_seurat_Maelstrom <- function(seurat_object,
       TF_signal <- t(TF_signal)
       TF_signal <- TF_signal[rep(seq_len(nrow(TF_signal)), each = nrow(relevant_IDS)), ]
       rownames(TF_signal) <- rownames(as.data.frame(relevant_IDS))
+      #print(TF_signal)
       cell_signal_list[[i]] <- TF_signal}else{print(paste0(paste0('no cells of id ',cell_type),' found in seurat object'))}
     i = i + 1
   }
   TF_array <- do.call("rbind", cell_signal_list)
-
+  #print(head(TF_array))
   #add cell IDs that do not have ANANSE signal and give them a NA vallue
   cell_barcodes_all <- rownames(as.data.frame(Seurat::Idents(object = seurat_object)))
   cell_barcodes_missing <- cell_barcodes_all[!cell_barcodes_all %in% rownames(TF_array)]
-  cell_barcodes_missing <- as.data.frame(cell_barcodes_missing)
-  for (TF in colnames(TF_signal)){
-    cell_barcodes_missing[[TF]] <- NA
+  if (length(rownames(cell_barcodes_missing)) > 0){
+    cell_barcodes_missing <- as.data.frame(cell_barcodes_missing)
+    for (TF in colnames(TF_signal)){
+      print(TF)
+      cell_barcodes_missing[[TF]] <- NA
+    }
+    rownames(cell_barcodes_missing) <- cell_barcodes_missing$cell_barcodes_missing
+    cell_barcodes_missing$cell_barcodes_missing <- NULL
+    TF_array <- rbind(TF_array,cell_barcodes_missing)
   }
-  rownames(cell_barcodes_missing) <- cell_barcodes_missing$cell_barcodes_missing
-  cell_barcodes_missing$cell_barcodes_missing <- NULL
-
-  TF_output <- t(rbind(TF_array,cell_barcodes_missing))
-  seurat_object[['Maelstrom']] <- Seurat::CreateAssayObject(TF_output)
+  seurat_object[['Maelstrom']] <- Seurat::CreateAssayObject(t(TF_array))
   return(list(seurat_object,motif_df))
-
 }
