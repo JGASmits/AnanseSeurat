@@ -490,6 +490,7 @@ generate_TF_Motif_tables <- function(maelstrom_object,
                                      select_most_var = FALSE){
   ## Check if m2f_df object provided or path to Maelstrom output.
   ## Check if m2f_df object provided contains the right columns.
+  
   m2f_df_cols <- c("Motif","Factor")
   if (is.null(m2f_df)){
     if (is.null(maelstrom_dir)){
@@ -548,12 +549,12 @@ generate_TF_Motif_tables <- function(maelstrom_object,
   m2f_df_match <- m2f_df_match[base::abs(m2f_df_match$cor) > cor_tresh,]
   
   # ## Select highest correlating TF per motif
-  # m2f_df_unique <- m2f_df_match %>% dplyr::group_by(motif) %>%
-  #   dplyr::arrange(desc(cor)) %>% dplyr::filter(row_number() == 1)
+  # m2f_df_unique <- m2f_df_match %>% dplyr::group_by(m2f_df_match$Motif) %>%
+  #   dplyr::arrange(desc(cor)) %>% dplyr::filter(dplyr::row_number() == 1)
   
   ## Select highest absolute correlation of TF and motif
-  m2f_df_unique <- m2f_df_match %>% dplyr::group_by(Motif) %>%
-    dplyr::arrange(dplyr::desc(base::abs(stats::cor))) %>% dplyr::filter(row_number() == 1)
+  m2f_df_unique <- m2f_df_match %>% dplyr::group_by(m2f_df_match$Motif) %>%
+    dplyr::arrange(dplyr::desc(base::abs(m2f_df_match$cor))) %>% dplyr::filter(dplyr::row_number() == 1)
   
   m2f <- m2f_df_unique
   # Select only positive correlations or only negative correlations (repressors)
