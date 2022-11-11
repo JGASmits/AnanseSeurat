@@ -455,11 +455,6 @@ import_seurat_Maelstrom <- function(seurat_object,
   return(list(seurat_object,motif_df))
 }
 
-
-######################################################
-### Make correlated motif-TF matrices for plotting ###
-######################################################
-
 #' generate_TF_linked_motif_tables
 #'
 #' create motif-factor links & export tables for printing motif score alongside its binding factor
