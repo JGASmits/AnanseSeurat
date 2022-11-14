@@ -611,8 +611,7 @@ generate_TF_Motif_tables <- function(maelstrom_object,
       new_assay[TF,cluster_cells] <- mot_plot[TF,cluster]
     }
   }
-  
-  assay_name <- paste0(assay_name, "_binding")
+  assay_name <- paste0(assay_name, "Score")
   seurat_object[[assay_name]] <- Seurat::CreateAssayObject(new_assay)
   matrix_list[["seurat_object"]] <- seurat_object
   
