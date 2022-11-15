@@ -556,9 +556,11 @@ generate_TF_Motif_tables <- function(maelstrom_object,
   if (repressors == TRUE){
     print("Selecting repressors")
     m2f <- m2f_df_unique[m2f_df_unique$cor < 0,]
+    assay_name <- "repressor"
   } else {
     print("Selecting activators")
     m2f <- m2f_df_unique[m2f_df_unique$cor > 0,]
+    assay_name <- "activator" 
   }
   
   ## Order motifs according to m2f
@@ -582,8 +584,6 @@ generate_TF_Motif_tables <- function(maelstrom_object,
     mot_plot <- as.data.frame(mot_plot, row.names = mot_plot[,1])[,-1]
   }
   
-  
-  
   ## order expression matrix and motif matrix the same way
   exp_plot <- exp_mat[match(rownames(mot_plot),rownames(exp_mat)),]
   
@@ -600,5 +600,20 @@ generate_TF_Motif_tables <- function(maelstrom_object,
   matrix_list[["scaled_expression"]] <- exp_plot_scale
   matrix_list[["scaled_motif_score"]] <- mot_plot_scale
   matrix_list[["motif_tf_correlations"]] <- m2f_df_match
+  
+  ## Create seurat assay with binding factor assay
+  new_assay <- as.data.frame(matrix(data = NA, ncol = length(colnames(seurat_object)), nrow = length(rownames(mot_plot))))
+  colnames(new_assay) <- colnames(seurat_object)
+  rownames(new_assay) <- rownames(mot_plot)
+  for (cluster in colnames(mot_plot)){
+    cluster_cells <- colnames(seurat_object[,seurat_object@meta.data[[cluster_id]] == cluster])
+    for (TF in rownames(new_assay)){
+      new_assay[TF,cluster_cells] <- mot_plot[TF,cluster]
+    }
+  }
+  assay_name <- paste0(assay_name, "Score")
+  seurat_object[[assay_name]] <- Seurat::CreateAssayObject(new_assay)
+  matrix_list[["seurat_object"]] <- seurat_object
+  
   return(matrix_list)
 }
