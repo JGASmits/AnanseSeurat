@@ -18,5 +18,5 @@ per_cluster_df(
 \item{cluster_id}{ID used for finding clusters of cells}
 }
 \description{
-generate a table of the assay scores per cluster
+generate a table of the assay score averages per cluster identifier cell
 }

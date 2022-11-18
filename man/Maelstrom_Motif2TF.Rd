@@ -2,7 +2,7 @@
 % Please edit documentation in R/ANANSE_seurat_wrapper.R
 \name{Maelstrom_Motif2TF}
 \alias{Maelstrom_Motif2TF}
-\title{generate_TF_linked_motif_tables}
+\title{Maelstrom_Motif2TF}
 \usage{
 Maelstrom_Motif2TF(
   seurat_object,
@@ -10,24 +10,29 @@ Maelstrom_Motif2TF(
   m2f_df = NULL,
   cluster_id = "seurat_clusters",
   maelstrom_dir = "./maelstrom/",
+  combine_motifs = "mean",
   RNA_expression_assay = "RNA",
   RNA_expression_slot = "data",
   expr_tresh = 10,
   cor_tresh = 0.3,
+  curated_motifs = F,
   cor_method = "pearson",
   output_dir = "./",
-  select_most_var = FALSE,
   return_df = F
 )
 }
 \arguments{
 \item{seurat_object}{object}
 
-\item{mot_mat}{motif_matrix}
+\item{mot_mat}{motif_matrix, if not provided extracts one from the single cell object from the maelstrom assay}
+
+\item{m2f_df}{motif to factor dataframe, if not provided extracts from the maelstrom directory}
 
 \item{cluster_id}{ID used for finding clusters of cells}
 
 \item{maelstrom_dir}{directory where the GimmeMotifs m2f table is stored}
+
+\item{combine_motifs}{mean (take mean multiple motifscores), max_var (take motif with highest variance), or cor (take motif with best correlation to gene expression)}
 
 \item{RNA_expression_assay}{Seurat assay containing factor expression info}
 
@@ -37,15 +42,13 @@ Maelstrom_Motif2TF(
 
 \item{cor_tresh}{minimum value of to filter the cor() output by}
 
+\item{curated_motifs}{use only curated motifs (T), or all motifs in the database (F)}
+
 \item{cor_method}{specify one of the cor() methods}
 
 \item{output_dir}{where to store the results}
 
 \item{return_df}{return both the seurat object and two dataframes with maelstrom scores and expression values as a list}
-
-\item{all_motifs}{use all motifs (T), or only curated motifs (F)}
-
-\item{combine_motifs}{mean (take mean multiple motifscores), max_var (take motif with highest variance), or cor (take motif with best correlation to gene expression)}
 }
 \description{
 create motif-factor links & export tables for printing motif score alongside its binding factor

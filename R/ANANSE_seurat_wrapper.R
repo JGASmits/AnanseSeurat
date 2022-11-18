@@ -429,7 +429,7 @@ export_ATAC_maelstrom <- function(seurat_object,
 #' load Maelstrom enriched motifs
 #' @param seurat_object object
 #' @param cluster_id ID used for finding clusters of cells
-#' @param Maelstrom_dir directory where the maelstrom results are stored
+#' @param maelstrom_dir directory where the maelstrom results are stored
 #' @param return_df return both the seurat object and a dataframe with maelstrom scores as a list
 #' @export
 import_seurat_maelstrom <- function(seurat_object,
@@ -485,11 +485,12 @@ import_seurat_maelstrom <- function(seurat_object,
   else{return(seurat_object)}
 }
 
-#' generate_TF_linked_motif_tables
+#' Maelstrom_Motif2TF
 #'
 #' create motif-factor links & export tables for printing motif score alongside its binding factor
 #' @param seurat_object object
-#' @param mot_mat motif_matrix
+#' @param mot_mat motif_matrix, if not provided extracts one from the single cell object from the maelstrom assay
+#' @param m2f_df motif to factor dataframe, if not provided extracts from the maelstrom directory
 #' @param cluster_id ID used for finding clusters of cells
 #' @param maelstrom_dir directory where the GimmeMotifs m2f table is stored
 #' @param RNA_expression_assay Seurat assay containing factor expression info
@@ -497,7 +498,7 @@ import_seurat_maelstrom <- function(seurat_object,
 #' @param expr_tresh minimum sum of gene counts over all cells in RNA_expression_assay to filter genes by
 #' @param cor_tresh minimum value of to filter the cor() output by
 #' @param cor_method specify one of the cor() methods
-#' @param all_motifs use all motifs (T), or only curated motifs (F)
+#' @param curated_motifs use only curated motifs (T), or all motifs in the database (F)
 #' @param output_dir where to store the results
 #' @param combine_motifs mean (take mean multiple motifscores), max_var (take motif with highest variance), or cor (take motif with best correlation to gene expression)
 #' @param return_df return both the seurat object and two dataframes with maelstrom scores and expression values as a list
@@ -508,13 +509,14 @@ Maelstrom_Motif2TF <- function(seurat_object,
                                m2f_df = NULL,
                                cluster_id = 'seurat_clusters',
                                maelstrom_dir = './maelstrom/',
+                               combine_motifs = 'mean',
                                RNA_expression_assay = "RNA",
                                RNA_expression_slot = "data",
                                expr_tresh = 10,
                                cor_tresh = 0.30,
+                               curated_motifs = F,
                                cor_method = "pearson",
                                output_dir = "./",
-                               select_most_var = FALSE,
                                return_df = F
 ){
   ## Check if m2f_df object provided or path to Maelstrom output.
@@ -529,6 +531,10 @@ Maelstrom_Motif2TF <- function(seurat_object,
   } else if (!unique(m2f_df_cols %in% colnames(m2f_df))){
     print("Provide m2f_df with at least 2 columns with names Motif and Factor.")
   }
+
+  if (curated_motifs){
+    print('using only curated motifs from database')
+    m2f_df <- m2f_df[m2f_df$Curated == 'Y',]}
 
   ## Load needed objects
   if(is.null(mot_mat)){
@@ -610,20 +616,28 @@ Maelstrom_Motif2TF <- function(seurat_object,
     rownames(mot_plot) <- m2f$Factor
 
     ## Make motif score per TF (selecting most variable motif per TF or make mean of all motifs associated).
-    if (select_most_var == TRUE){
+    if (combine_motifs == 'mean'){
+      print("Take mean motif score of all binding motifs per TF")
+      ## Take mean of motifs linked to the same TF
+      mot_plot <- stats::aggregate(mot_plot, list(row.names(mot_plot)), mean)
+      mot_plot <- as.data.frame(mot_plot, row.names = mot_plot[,1])[,-1]
+    }
+    if(combine_motifs == 'cor') {
+      print("Motif best (absolute)correlated to expression is selected per TF")
+      mot_plot <- cbind(mot_plot, matrix(apply(mot_plot, 1, stats::var)))
+      colnames(mot_plot)[length(colnames(mot_plot))]<-"var"
+      mot_plot <- mot_plot[order(mot_plot[,"var"], decreasing = T),]
+      # Remove duplicated occurences of rowname (ordered on variation)
+      mot_plot <- mot_plot[!duplicated(rownames(mot_plot)),]
+      mot_plot <- mot_plot[,!colnames(mot_plot) %in% c("var")]}
+    if(combine_motifs == 'max_var'){
       print("Most variable binding motif is selected per TF")
       mot_plot <- cbind(mot_plot, matrix(apply(mot_plot, 1, stats::var)))
       colnames(mot_plot)[length(colnames(mot_plot))]<-"var"
       mot_plot <- mot_plot[order(mot_plot[,"var"], decreasing = T),]
       # Remove duplicated occurences of rowname (ordered on variation)
       mot_plot <- mot_plot[!duplicated(rownames(mot_plot)),]
-      mot_plot <- mot_plot[,!colnames(mot_plot) %in% c("var")]
-    } else {
-      print("Take mean motif score of all binding motifs per TF")
-      ## Take mean of motifs linked to the same TF
-      mot_plot <- stats::aggregate(mot_plot, list(row.names(mot_plot)), mean)
-      mot_plot <- as.data.frame(mot_plot, row.names = mot_plot[,1])[,-1]
-    }
+      mot_plot <- mot_plot[,!colnames(mot_plot) %in% c("var")]}
 
     ## order expression matrix and motif matrix the same way
     exp_plot <- exp_mat[match(rownames(mot_plot),rownames(exp_mat)),]
@@ -657,7 +671,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
   matrix_list[["seurat_object"]] <- seurat_object
 
 
-  if (return_df){return(list(seurat_object,motif_df))}
+  if (return_df){return(list(seurat_object,matrix_list))}
   else{return(seurat_object)}
 }
 
@@ -825,7 +839,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
 
 #' per_cluster_df
 #'
-#' generate a table of the assay scores per cluster
+#' generate a table of the assay score averages per cluster identifier cell
 #' @param seurat_object seurat object
 #' @param assay assay containing influence or motif scores generated from cluster pseudobulk
 #' @param cluster_id ID used for finding clusters of cells

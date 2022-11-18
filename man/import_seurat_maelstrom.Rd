@@ -16,9 +16,9 @@ import_seurat_maelstrom(
 
 \item{cluster_id}{ID used for finding clusters of cells}
 
-\item{return_df}{return both the seurat object and a dataframe with maelstrom scores as a list}
+\item{maelstrom_dir}{directory where the maelstrom results are stored}
 
-\item{Maelstrom_dir}{directory where the maelstrom results are stored}
+\item{return_df}{return both the seurat object and a dataframe with maelstrom scores as a list}
 }
 \description{
 load Maelstrom enriched motifs
