@@ -500,7 +500,7 @@ import_seurat_maelstrom <- function(seurat_object,
 #' @param cor_method specify one of the cor() methods
 #' @param curated_motifs use only curated motifs (T), or all motifs in the database (F)
 #' @param output_dir where to store the results
-#' @param combine_motifs mean (take mean multiple motifscores), max_var (take motif with highest variance), or cor (take motif with best correlation to gene expression)
+#' @param combine_motifs means (take mean multiple motifscores), max_var (take motif with highest variance), or max_cor (take motif with best correlation to gene expression)
 #' @param return_df return both the seurat object and two dataframes with maelstrom scores and expression values as a list
 #' @export
 #' @importFrom rlang .data
@@ -509,7 +509,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
                                m2f_df = NULL,
                                cluster_id = 'seurat_clusters',
                                maelstrom_dir = './maelstrom/',
-                               combine_motifs = 'mean',
+                               combine_motifs = 'means',
                                RNA_expression_assay = "RNA",
                                RNA_expression_slot = "data",
                                expr_tresh = 10,
@@ -575,24 +575,25 @@ Maelstrom_Motif2TF <- function(seurat_object,
   TF_mat <- exp_mat[rownames(exp_mat) %in% m2f_df$Factor,]
 
   m2f_df_match <- m2f_df[m2f_df$Motif %in% rownames(mot_mat) & m2f_df$Factor %in% rownames(TF_mat),]
-
-  m2f_df_match$cor <- NA
+  ## Creat unique motif-factor entries, losing curation information
+  m2f_df_match <- unique(m2f_df_match[,!colnames(m2f_df_match) %in% c("Evidence", "Curated")])
+  
   ## perform correlations between cluster expression and cluster motif enrichment
+  ## calculate motif score variation over clusters
+  m2f_df_match$cor <- NA
+  m2f_df_match$var <- NA
   for (i in 1:nrow(m2f_df_match)){
     m2f_df_match$cor[i] <- stats::cor(mot_mat[m2f_df_match$Motif[i],],exp_mat[m2f_df_match$Factor[i],], method = cor_method)
+    m2f_df_match$var[i] <- stats::var(mot_mat[m2f_df_match$Motif[i],])
   }
-
+  
   ## Only keep motif-TF combinations with an absolute R higher than treshold
   print(paste0("Only keep motif-TF combinations with an R > ", cor_tresh))
   m2f_df_match <- m2f_df_match[base::abs(m2f_df_match$cor) > cor_tresh,]
-
-  # ## Select highest correlating TF per motif
-  # m2f_df_unique <- m2f_df_match %>% dplyr::group_by(m2f_df_match$Motif) %>%
-  #   dplyr::arrange(desc(cor)) %>% dplyr::filter(dplyr::row_number() == 1)
-
+  
   ## Select highest absolute correlation of TF and motif
-  m2f_df_unique <- m2f_df_match %>% dplyr::group_by(m2f_df_match$Motif) %>%
-    dplyr::arrange(dplyr::desc(base::abs(m2f_df_match$cor))) %>% dplyr::filter(dplyr::row_number() == 1)
+  m2f_df_unique <- as.data.frame(m2f_df_match %>% dplyr::group_by(m2f_df_match$Motif) %>%
+    dplyr::arrange(dplyr::desc(base::abs(m2f_df_match$cor))) %>% dplyr::filter(dplyr::row_number() == 1))
 
   print(paste0('total length m2f_df_unique ', length(m2f_df_unique$cor)))
   #Select only positive correlations or only negative correlations (repressors)
@@ -609,35 +610,46 @@ Maelstrom_Motif2TF <- function(seurat_object,
       m2f <- m2f_df_unique[m2f_df_unique$cor > 0,]
       print(paste0('total m2f', length(m2f$cor)))
     }
+    
+    m2f$associated_motifs <- NA
+    for (tf in unique(m2f$Factor)){
+      ## Generate a string with all associated motifs and their correlation to the tf
+      motif_vector <- c()
+      for (motif in unique(m2f[m2f$Factor == tf, c("Motif")])){
+        motif_cor <- paste0(c(motif, unique(m2f[m2f$Factor== tf & m2f$Motif == motif,"cor"])), collapse = ":")
+        motif_vector <- paste0(c(motif_vector, motif_cor), collapse = "_")
+      }
+      m2f[m2f$Factor == tf,]$associated_motifs <- motif_vector
+    }
 
-    ## Order motifs according to m2f
-    mot_plot <- mot_mat[match(m2f$Motif,rownames(mot_mat)),]
-    ## Replace motif name by TF name
-    rownames(mot_plot) <- m2f$Factor
-
+    ## Order motifs according to m2f & replace with TF name
+    mot_plot <- as.matrix(mot_mat[match(m2f$Motif,rownames(mot_mat)),])
+    
     ## Make motif score per TF (selecting most variable motif per TF or make mean of all motifs associated).
-    if (combine_motifs == 'mean'){
+    if (combine_motifs == 'means'){
+      rownames(mot_plot) <- m2f$Factor
       print("Take mean motif score of all binding motifs per TF")
       ## Take mean of motifs linked to the same TF
       mot_plot <- stats::aggregate(mot_plot, list(row.names(mot_plot)), mean)
       mot_plot <- as.data.frame(mot_plot, row.names = mot_plot[,1])[,-1]
+      m2f <- as.data.frame(m2f[!duplicated(m2f$Factor), c("Factor","associated_motifs"), drop = FALSE])
     }
-    if(combine_motifs == 'cor') {
-      print("Motif best (absolute) correlated to expression is selected per TF")
-      mot_plot <- cbind(mot_plot, m2f[["cor"]])
-      colnames(mot_plot)[length(colnames(mot_plot))]<-"cor"
-      mot_plot <- mot_plot[order(base::abs(mot_plot[,"cor"]), decreasing = T),]
-      # Remove duplicated occurences of rowname (ordered on variation)
-      mot_plot <- mot_plot[!duplicated(rownames(mot_plot)),]
-      mot_plot <- mot_plot[,!colnames(mot_plot) %in% c("cor")]}
+    if(combine_motifs == 'max_cor') {
+      print("Motif best (absolute) correlated to expression is selected per TF") 
+      ## Using m2f file for selecting highest correlating motif to factor:
+      m2f <- m2f[order(base::abs(m2f[,"cor"]), decreasing = T),, drop = FALSE]
+      m2f <- m2f[!duplicated(m2f$Factor),c("Factor","Motif","cor"), drop = FALSE]
+      mot_plot <- mot_plot[match(m2f$Motif, rownames(mot_plot)),]
+      rownames(mot_plot) <- m2f$Factor
+    }
     if(combine_motifs == 'max_var'){
       print("Most variable binding motif is selected per TF")
-      mot_plot <- cbind(mot_plot, matrix(apply(mot_plot, 1, stats::var)))
-      colnames(mot_plot)[length(colnames(mot_plot))]<-"var"
-      mot_plot <- mot_plot[order(mot_plot[,"var"], decreasing = T),]
-      # Remove duplicated occurences of rowname (ordered on variation)
-      mot_plot <- mot_plot[!duplicated(rownames(mot_plot)),]
-      mot_plot <- mot_plot[,!colnames(mot_plot) %in% c("var")]}
+      ## Using m2f file for selecting highest variable motif to factor:
+      m2f <- m2f[order(base::abs(m2f[,"var"]), decreasing = T),, drop = FALSE]
+      m2f <- m2f[!duplicated(m2f$Factor),c("Factor","Motif","var"), drop = FALSE]
+      mot_plot <- mot_plot[match(m2f$Motif, rownames(mot_plot)),]
+      rownames(mot_plot) <- m2f$Factor
+    }
 
     ## order expression matrix and motif matrix the same way
     exp_plot <- exp_mat[match(rownames(mot_plot),rownames(exp_mat)),]
@@ -654,7 +666,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
     matrix_list[["motif_score"]] <- mot_plot
     matrix_list[["scaled_expression"]] <- exp_plot_scale
     matrix_list[["scaled_motif_score"]] <- mot_plot_scale
-    matrix_list[["motif_tf_correlations"]] <- m2f_df_match
+    matrix_list[[paste0("tf2motif_selected_", combine_motifs)]] <- m2f
 
     ## Create seurat assay with binding factor assay
     new_assay <- as.data.frame(matrix(data = NA, ncol = length(colnames(seurat_object)), nrow = length(rownames(mot_plot))))
@@ -663,179 +675,20 @@ Maelstrom_Motif2TF <- function(seurat_object,
     for (cluster in colnames(mot_plot)){
       cluster_cells <- colnames(seurat_object[,seurat_object@meta.data[[cluster_id]] == cluster])
       for (TF in rownames(new_assay)){
-        new_assay[TF,cluster_cells] <- mot_plot[TF,cluster]
+        new_assay[TF,cluster_cells] <- as.matrix(mot_plot[TF,cluster])
       }
     }
     seurat_object[[typeTF]] <- Seurat::CreateAssayObject(new_assay)
+    ## Adding meta.features with information about the motifs used in the matrix
+    m2f <- as.data.frame(m2f[match(rownames(new_assay), m2f$Factor),])
+    rownames(m2f) <- m2f$Factor
+    seurat_object[[typeTF]]@meta.features <- m2f[,!colnames(m2f) == "Factor", drop = FALSE]
     }
   matrix_list[["seurat_object"]] <- seurat_object
-
 
   if (return_df){return(list(seurat_object,matrix_list))}
   else{return(seurat_object)}
 }
-
-#  - function(seurat_object,
-#                                mot_mat,#get motmat from pbmc?
-#                                cluster_id = 'seurat_clusters',
-#                                maelstrom_dir = '~/',
-#                                RNA_expression_assay = "RNA",
-#                                RNA_expression_slot = "data",
-#                                expr_tresh = 100,
-#                                cor_tresh = 0.30,
-#                                cor_method = "pearson",
-#                                all_motifs = T,
-#                                output_dir = "./",
-#                                combine_motifs = 'mean',
-#                                return_df = F
-# ){
-#   ## Check if m2f_df object provided or path to Maelstrom output.
-#   ## Check if m2f_df object provided contains the right columns.
-#   m2f_file <- paste0(maelstrom_dir, "/nonredundant.motifs.motif2factors.txt")
-#   m2f_df <- utils::read.table(m2f_file, header = T, sep = '\t',check.names=FALSE)
-#   m2f_df$Factor = toupper(m2f_df$Factor)
-#   m2f_df$Motif <-<- gsub('_', '-',m2f_df$Motif)
-#
-#
-#   #optional filter to only curated motifs:
-#   if (!all_motifs){
-#     print('using only curated motifs')
-#     m2f_df <- m2f_df[m2f_df$Curated == 'Y',]}
-#
-#
-#   ## Set up Seurat object
-#   Seurat::DefaultAssay(seurat_object) <- RNA_expression_assay
-#   genes_expressed <- rownames(seurat_object)[rowSums(seurat_object[[RNA_expression_assay]]@counts) >= expr_tresh]
-#   seurat_object <- seurat_object[genes_expressed,]
-#
-#   ## Select motifs with binding TFs present in object
-#   m2f_df <- m2f_df[m2f_df$Factor %in% rownames(seurat_object),]
-#
-#   ## Check if data is normalized
-#   if (identical(seurat_object[[RNA_expression_assay]]@data, seurat_object[[RNA_expression_assay]]@counts) & RNA_expression_slot == "data"){
-#     print("Your data slot was not yet normalized.")
-#     print(paste0("Seurat NormalizeData with default settings will be run on all the genes in the ", RNA_expression_assay, " assay."))
-#     seurat_object <- Seurat::NormalizeData(seurat_object, assay = RNA_expression_assay)
-#   }
-#
-#   ## Obtain df with mean expression
-#   exp_mat <- Seurat::AverageExpression(seurat_object, assays = RNA_expression_assay,
-#                                        slot = RNA_expression_slot,
-#                                        features = m2f_df$Factor,
-#                                        group.by = cluster_id)[[1]]
-#
-#   ## make sure that all genes in matrix have mean expression > 0
-#   exp_mat <- exp_mat[rowSums(exp_mat) > expr_tresh,]
-#   exp_mat <- as.data.frame(exp_mat)
-#
-#
-#   #filter each matrix to only contain columns present in the other matrix
-#   exp_mat <- exp_mat[(colnames(exp_mat) %in% colnames(mot_mat))]
-#   mot_mat <- mot_mat[(colnames(mot_mat) %in% colnames(exp_mat))]
-#
-#
-#   ## limit table to motifs and TFs present in dataset
-#   mot_mat <- mot_mat[rownames(mot_mat) %in% m2f_df$Motif,]
-#   TF_mat <- exp_mat[rownames(exp_mat) %in% m2f_df$Factor,]
-#
-#   m2f_df_match <- m2f_df[m2f_df$Motif %in% rownames(mot_mat) & m2f_df$Factor %in% rownames(TF_mat),]
-#
-#   exp_mat <- as.matrix(exp_mat)
-#   mot_mat <- as.matrix(mot_mat)
-#
-#   #add optional filter for only curated
-#   m2f_df_match$cor <- NA
-#
-#   ## perform correlations between cluster expression and cluster motif enrichment
-#   for (i in 1:nrow(m2f_df_match)){
-#     m2f_df_match$cor[i] <- stats::cor(mot_mat[m2f_df_match$Motif[i],],exp_mat[m2f_df_match$Factor[i],], method = cor_method)
-#   }
-#
-#   ## Only keep motif-TF combinations with an absolute R higher than treshold
-#   print(paste0("Only keep motif-TF combinations with an R > ", cor_tresh))
-#   m2f_df_match <- m2f_df_match[base::abs(m2f_df_match$cor) > cor_tresh,]
-#
-#
-#   ## Select highest absolute correlation of TF and motif
-#   m2f_df_unique <- m2f_df_match %>% dplyr::group_by(m2f_df_match$Motif) %>%
-#     dplyr::arrange(dplyr::desc(base::abs(m2f_df_match$cor))) %>% dplyr::filter(dplyr::row_number() == 1)
-#
-#   m2f <- m2f_df_unique
-#   # Select only positive correlations or only negative correlations (repressors)
-#
-#   for (typeTF in c('repressor','activator')){
-#   if (typeTF == 'repressor'){
-#     print("Selecting repressors")
-#     m2f <- m2f_df_unique[m2f_df_unique$cor < 0,]
-#   } else {
-#     print("Selecting activators")
-#     m2f <- m2f_df_unique[m2f_df_unique$cor > 0,]
-#   }
-#
-#     ## Order motifs according to m2f
-#     mot_plot <- mot_mat[match(m2f$Motif,rownames(mot_mat)),]
-#     ## Replace motif name by TF name
-#     rownames(mot_plot) <- m2f$Factor
-#
-#     ## Make motif score per TF (selecting most variable motif per TF or make mean of all motifs associated).
-#     if (combine_motifs == 'mean'){
-#       print("Take mean motif score of all binding motifs per TF")
-#       ## Take mean of motifs linked to the same TF
-#       mot_plot <- stats::aggregate(mot_plot, list(row.names(mot_plot)), mean)
-#       mot_plot <- as.data.frame(mot_plot, row.names = mot_plot[,1])[,-1]
-#     }
-#     if(combine_motifs == 'cor') {
-#       print("Motif best (absolute)correlated to expression is selected per TF")
-#       mot_plot <- cbind(mot_plot, matrix(apply(mot_plot, 1, stats::var)))
-#       colnames(mot_plot)[length(colnames(mot_plot))]<-"var"
-#       mot_plot <- mot_plot[order(mot_plot[,"var"], decreasing = T),]
-#       # Remove duplicated occurences of rowname (ordered on variation)
-#       mot_plot <- mot_plot[!duplicated(rownames(mot_plot)),]
-#       mot_plot <- mot_plot[,!colnames(mot_plot) %in% c("var")]}
-#     if(combine_motifs == 'max_var'){
-#       print("Most variable binding motif is selected per TF")
-#       mot_plot <- cbind(mot_plot, matrix(apply(mot_plot, 1, stats::var)))
-#       colnames(mot_plot)[length(colnames(mot_plot))]<-"var"
-#       mot_plot <- mot_plot[order(mot_plot[,"var"], decreasing = T),]
-#       # Remove duplicated occurences of rowname (ordered on variation)
-#       mot_plot <- mot_plot[!duplicated(rownames(mot_plot)),]
-#       mot_plot <- mot_plot[,!colnames(mot_plot) %in% c("var")]}
-#
-#     ## order expression matrix and motif matrix the same way
-#     exp_plot <- exp_mat[match(rownames(mot_plot),rownames(exp_mat)),]
-#
-#     exp_plot_scale <- t(scale(t(exp_plot)))
-#     mot_plot_scale <- t(scale(t(mot_plot)))
-#
-#     # expression_file <- paste(output_dir, "expression_means_scaled.tsv", sep = '/')
-#     # utils::write.table(exp_plot_scale, expression_file, sep = '\t', quote = F)
-#     # motif_file <- paste(output_dir, "motif_intensities_scaled.tsv", sep = '/')
-#     # utils::write.table(mot_plot_scale, motif_file, sep = '\t', quote = F)
-#     matrix_list <- list()
-#     matrix_list[["expression"]] <- exp_plot
-#     matrix_list[["motif_score"]] <- mot_plot
-#     matrix_list[["scaled_expression"]] <- exp_plot_scale
-#     matrix_list[["scaled_motif_score"]] <- mot_plot_scale
-#     matrix_list[["motif_tf_correlations"]] <- m2f_df_match
-#
-#     ## Create seurat assay with binding factor assay
-#     new_assay <- as.data.frame(matrix(data = NA, ncol = length(colnames(seurat_object)), nrow = length(rownames(mot_plot))))
-#     colnames(new_assay) <- colnames(seurat_object)
-#     rownames(new_assay) <- rownames(mot_plot)
-#     for (cluster in colnames(mot_plot)){
-#       cluster_cells <- colnames(seurat_object[,seurat_object@meta.data[[cluster_id]] == cluster])
-#       for (TF in rownames(new_assay)){
-#         new_assay[TF,cluster_cells] <- mot_plot[TF,cluster]
-#       }
-#     }
-#     assay_name <- paste0(typeTF, "Score")
-#     seurat_object[[assay_name]] <- Seurat::CreateAssayObject(new_assay)
-#     matrix_list[["seurat_object"]] <- seurat_object
-#   }
-#   if (return_df){return(matrix_list)}else{return(seurat_object)}
-# }
-
-
 
 #' per_cluster_df
 #'
