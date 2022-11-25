@@ -623,13 +623,13 @@ Maelstrom_Motif2TF <- function(seurat_object,
       mot_plot <- as.data.frame(mot_plot, row.names = mot_plot[,1])[,-1]
     }
     if(combine_motifs == 'cor') {
-      print("Motif best (absolute)correlated to expression is selected per TF")
-      mot_plot <- cbind(mot_plot, matrix(apply(mot_plot, 1, stats::var)))
-      colnames(mot_plot)[length(colnames(mot_plot))]<-"var"
-      mot_plot <- mot_plot[order(mot_plot[,"var"], decreasing = T),]
+      print("Motif best (absolute) correlated to expression is selected per TF")
+      mot_plot <- cbind(mot_plot, m2f[["cor"]])
+      colnames(mot_plot)[length(colnames(mot_plot))]<-"cor"
+      mot_plot <- mot_plot[order(base::abs(mot_plot[,"cor"]), decreasing = T),]
       # Remove duplicated occurences of rowname (ordered on variation)
       mot_plot <- mot_plot[!duplicated(rownames(mot_plot)),]
-      mot_plot <- mot_plot[,!colnames(mot_plot) %in% c("var")]}
+      mot_plot <- mot_plot[,!colnames(mot_plot) %in% c("cor")]}
     if(combine_motifs == 'max_var'){
       print("Most variable binding motif is selected per TF")
       mot_plot <- cbind(mot_plot, matrix(apply(mot_plot, 1, stats::var)))
