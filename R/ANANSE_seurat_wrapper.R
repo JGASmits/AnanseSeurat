@@ -550,7 +550,6 @@ Maelstrom_Motif2TF <- function(seurat_object,
   Seurat::DefaultAssay(seurat_object) <- RNA_expression_assay
   genes_expressed <- rownames(seurat_object)[rowSums(seurat_object[[RNA_expression_assay]]@counts) >= expr_tresh]
   seurat_object[[RNA_expression_assay]] <- Seurat::CreateAssayObject(counts = seurat_object[[RNA_expression_assay]]@data[genes_expressed,])
-  subset(seurat_object, features = genes_expressed)
 
   ## Select motifs with binding TFs present in object
   m2f_df <- m2f_df[m2f_df$Factor %in% rownames(seurat_object),]
