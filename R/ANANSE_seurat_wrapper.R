@@ -544,10 +544,12 @@ Maelstrom_Motif2TF <- function(seurat_object,
                                cluster_id = cluster_id)
     mot_mat <- as.matrix(mot_mat)
   }
+  
   ## Set up Seurat object
+  print("non-expressed genes are removed")
   Seurat::DefaultAssay(seurat_object) <- RNA_expression_assay
   genes_expressed <- rownames(seurat_object)[rowSums(seurat_object[[RNA_expression_assay]]@counts) >= expr_tresh]
-  seurat_object <- seurat_object[genes_expressed,]
+  seurat_object[[RNA_expression_assay]] <- Seurat::CreateAssayObject(counts = seurat_object[[RNA_expression_assay]]@data[genes_expressed,])
 
   ## Select motifs with binding TFs present in object
   m2f_df <- m2f_df[m2f_df$Factor %in% rownames(seurat_object),]
@@ -557,6 +559,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
     print("Your data slot was not yet normalized.")
     print(paste0("Seurat NormalizeData with default settings will be run on all the genes in the ", RNA_expression_assay, " assay."))
     seurat_object <- Seurat::NormalizeData(seurat_object, assay = RNA_expression_assay)
+  
   }
 
   ## Obtain df with mean expression
@@ -678,6 +681,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
         new_assay[TF,cluster_cells] <- as.matrix(mot_plot[TF,cluster])
       }
     }
+  
     seurat_object[[typeTF]] <- Seurat::CreateAssayObject(new_assay)
     ## Adding meta.features with information about the motifs used in the matrix
     m2f <- as.data.frame(m2f[match(rownames(new_assay), m2f$Factor),])
