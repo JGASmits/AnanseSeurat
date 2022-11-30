@@ -9,6 +9,7 @@ DEGS_scANANSE(
   min_cells = 50,
   output_dir = "~/",
   cluster_id = "seurat_clusters",
+  RNA_count_assay = "RNA",
   additional_contrasts = "None"
 )
 }
@@ -20,6 +21,8 @@ DEGS_scANANSE(
 \item{output_dir}{directory where the files are outputted}
 
 \item{cluster_id}{ID used for finding clusters of cells}
+
+\item{RNA_count_assay}{assay of the seurat object containing the RNA count data}
 
 \item{additional_contrasts}{additional contrasts to add between clusters within cluster_ID}
 }

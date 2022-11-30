@@ -223,6 +223,7 @@ DEGS_scANANSE <- function(seurat_object,
                           min_cells = 50,
                           output_dir = '~/',
                           cluster_id = 'seurat_clusters',
+                          RNA_count_assay = "RNA",
                           additional_contrasts = 'None'
 ) {
   dir.create(file.path(paste0(output_dir,'/deseq2/')),showWarnings = FALSE)
@@ -256,12 +257,14 @@ DEGS_scANANSE <- function(seurat_object,
       if (comparison2 == 'average'){
         DEGS <- Seurat::FindMarkers(seurat_object,
                                     ident.1 = comparison1,
+                                    assay = RNA_count_assay,
                                     logfc.threshold = 0.1,
                                     min.pct = 0.05,
                                     return.thresh = 0.1)
       }else{DEGS <- Seurat::FindMarkers(seurat_object,
                                         ident.1 = comparison1,
                                         ident.2 = comparison2,
+                                        assay = RNA_count_assay,
                                         logfc.threshold = 0.1,
                                         min.pct = 0.05,
                                         return.thresh = 0.1)}
