@@ -535,6 +535,10 @@ Maelstrom_Motif2TF <- function(seurat_object,
     print("Provide m2f_df with at least 2 columns with names Motif and Factor.")
   }
 
+  if((combine_motifs != 'means')&(combine_motifs != 'max_cor')&(combine_motifs != 'max_var')){
+      stop("use either 'max_var', 'max_cor' or 'mav_var' as a selection method to select the most relevant motifs per TF")
+  }
+
   if (curated_motifs){
     print('using only curated motifs from database')
     m2f_df <- m2f_df[m2f_df$Curated == 'Y',]}
@@ -607,14 +611,14 @@ Maelstrom_Motif2TF <- function(seurat_object,
     m2f <- m2f_df_unique
     if (typeTF == 'TFanticor'){
       print("Selecting anticorrelating TFs")
-      print(paste0('total m2f', length(m2f$cor)))
+      #print(paste0('total m2f', length(m2f$cor)))
       m2f <- m2f_df_unique[m2f_df_unique$cor < 0,]
-      print(paste0('total m2f', length(m2f$cor)))
+      #print(paste0('total m2f', length(m2f$cor)))
     } else {
       print("Selecting correlating TFs")
-      print(paste0('total m2f', length(m2f$cor)))
+      #print(paste0('total m2f', length(m2f$cor)))
       m2f <- m2f_df_unique[m2f_df_unique$cor > 0,]
-      print(paste0('total m2f', length(m2f$cor)))
+      #print(paste0('total m2f', length(m2f$cor)))
     }
     
     m2f$associated_motifs <- NA
@@ -627,10 +631,9 @@ Maelstrom_Motif2TF <- function(seurat_object,
       }
       m2f[m2f$Factor == tf,]$associated_motifs <- motif_vector
     }
-
     ## Order motifs according to m2f & replace with TF name
     mot_plot <- as.matrix(mot_mat[match(m2f$Motif,rownames(mot_mat)),])
-    
+
     ## Make motif score per TF (selecting most variable motif per TF or make mean of all motifs associated).
     if (combine_motifs == 'means'){
       rownames(mot_plot) <- m2f$Factor
@@ -710,7 +713,7 @@ per_cluster_df <- function(seurat_object,
 
   #make a dataframe with the values per cluster:
   clusters <- unique(seurat_object[[cluster_id]])
-  print(clusters)
+  #print(clusters)
 
   #check if assay exists
   if(is.null(seurat_object@assays[[assay]])){
@@ -732,3 +735,42 @@ per_cluster_df <- function(seurat_object,
   cluster_data[[1]] <- NULL
   cluster_data <- cluster_data[,colSums(is.na(cluster_data))<nrow(cluster_data)]#remove columns with NAs
   return(cluster_data)}
+
+#' Factor_Motif_Plot
+#'
+#' plot both expression of a TF, and the motif accesibility of the associated motf. Finally fetch the motif logo from the Maelstrom directory.
+#' @param seurat_object seurat object
+#' @param assay assay containing influence or motif scores generated from cluster pseudobulk
+#' @param cluster_id ID used for finding clusters of cells
+#' @export
+Factor_Motif_Plot2 <- function(suerat_object,
+                                TF_list,
+                                assay_RNA = 'RNA',
+                                assay_maelstrom = 'TFanticor',
+                                logo_dir = '~/maelstrom/logos',
+                                col = c('darkred','white','darkgrey')){
+  DefaultAssay(object = suerat_object) <- assay_RNA
+  plot_expression1 <- Seurat::FeaturePlot(suerat_object, features = TF_list, ncol = 1, reduction = "umap")
+  DefaultAssay(object = suerat_object) <- assay_maelstrom
+  plot_Maelstrom_raw <- FeaturePlot(suerat_object,ncol = 1, features = TF_list, combine = F) 
+  TF_motif_table <- suerat_object@assays[[assay_maelstrom]][[]]
+
+  #replace the TF name with the motif name for the maelstrom enrichment score
+  plot_Maelstrom <- lapply(plot_Maelstrom_raw, function(x){
+    TF_name <- names(x$data)[4][[1]]
+    motif_name <- TF_motif_table[TF_name,]$Motif
+    x = x + ggplot2::labs(title = motif_name) 
+    x + ggplot2::scale_colour_gradient2(low = col[1], mid = col[2], high = col[3], midpoint = 0)
+    })
+  plot_Maelstrom <- patchwork::wrap_plots(plot_Maelstrom , ncol = 1)
+  plot_logo <- lapply(plot_Maelstrom_raw, function(x){
+    TF_name <- names(x$data)[4][[1]]
+    motif_name <- TF_motif_table[TF_name,]$Motif
+    motif_name <- gsub('\\.','_',motif_name)
+    motif_path <- paste0(logo_dir,motif_name,'.png')
+    logo_image <- png::readPNG(motif_path)
+    ggplot2::ggplot() + ggpubr::background_image(logo_image) #+ ggplot2::coord_fixed()
+    })
+  plot_logo <- patchwork::wrap_plots(plot_logo, ncol = 1)
+  return(plot_expression1|plot_Maelstrom|plot_logo)
+}
