@@ -608,9 +608,9 @@ Maelstrom_Motif2TF <- function(seurat_object,
 
   print(paste0('total length m2f_df_unique ', length(m2f_df_unique$cor)))
   #Select only positive correlations or only negative correlations (repressors)
-  for (typeTF in c('TFcor','TFanticor')){
+  for (typeTF in c('MotifTFcor','MotifTFanticor')){
     m2f <- m2f_df_unique
-    if (typeTF == 'TFanticor'){
+    if (typeTF == 'MotifTFanticor'){
       print("Selecting anticorrelating TFs")
       #print(paste0('total m2f', length(m2f$cor)))
       m2f <- m2f_df_unique[m2f_df_unique$cor < 0,]

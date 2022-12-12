@@ -20,4 +20,5 @@ Imports:
     rlang,
     Seurat,
     stringr,
-    utils
+    utils,
+    pak-version: devel
