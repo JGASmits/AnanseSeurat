@@ -10,7 +10,7 @@ Maelstrom_Motif2TF(
   m2f_df = NULL,
   cluster_id = "seurat_clusters",
   maelstrom_dir = "./maelstrom/",
-  combine_motifs = "mean",
+  combine_motifs = "means",
   RNA_expression_assay = "RNA",
   RNA_expression_slot = "data",
   expr_tresh = 10,
@@ -32,7 +32,7 @@ Maelstrom_Motif2TF(
 
 \item{maelstrom_dir}{directory where the GimmeMotifs m2f table is stored}
 
-\item{combine_motifs}{mean (take mean multiple motifscores), max_var (take motif with highest variance), or cor (take motif with best correlation to gene expression)}
+\item{combine_motifs}{means (take mean multiple motifscores), max_var (take motif with highest variance), or max_cor (take motif with best correlation to gene expression)}
 
 \item{RNA_expression_assay}{Seurat assay containing factor expression info}
 

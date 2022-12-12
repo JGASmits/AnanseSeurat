@@ -1,0 +1,515 @@
+---
+title: "single cell cluster ananse analysis"
+output:
+  html_document:
+---
+
+```{r setup}
+# if (!requireNamespace("remotes", quietly = TRUE)) {
+#   install.packages("remotes")
+# }
+# Sys.unsetenv("GITHUB_PAT")
+# remotes::install_github("mojaveazure/seurat-disk", upgrade = "never")#update none
+# remotes::install_github("JGASmits/AnanseSeuratWrapper")
+# install.packages("BiocManager")
+# BiocManager::install("ComplexHeatmap", update = F)
+# BiocManager::install("dendextend", update = F)
+
+
+library(Signac)
+library(Seurat)
+library(EnsDb.Hsapiens.v86)
+library(BSgenome.Hsapiens.UCSC.hg38)
+library(SeuratDisk)
+library(stringr)
+#library(AnanseSeuratWrapper)
+library(ComplexHeatmap)
+library(circlize)
+set.seed(1234)
+knitr::opts_knit$set(root.dir = normalizePath(".."))
+```
+
+```{r}
+# load the RNA and ATAC data
+#counts <- Read10X_h5('/scratch/jsmits/scANANSE/data/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5')
+counts <- Read10X_h5('./scANANSE/data/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5')
+fragpath <- "./scANANSE/data/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz"
+# get gene annotations for hg38
+annotation <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86)
+seqlevelsStyle(annotation) <- "UCSC"
+# create a Seurat object containing the RNA adata
+pbmc <- CreateSeuratObject(
+  counts = counts$`Gene Expression`,
+  assay = "RNA"
+)
+# create ATAC assay and add it to the object
+pbmc[["ATAC"]] <- CreateChromatinAssay(
+  counts = counts$Peaks,
+  sep = c(":", "-"),
+  fragments = fragpath,
+  annotation = annotation
+)
+
+DefaultAssay(pbmc) <- "ATAC"
+pbmc <- NucleosomeSignal(pbmc)
+pbmc <- TSSEnrichment(pbmc)
+
+# filter out low quality cells
+pbmc <- subset(
+  x = pbmc,
+  subset = nCount_ATAC < 100000 &
+    nCount_RNA < 25000 &
+    nCount_ATAC > 1000 &
+    nCount_RNA > 1000 &
+    nucleosome_signal < 2 &
+    TSS.enrichment > 1
+)
+
+# call peaks using MACS2
+peaks <- CallPeaks(pbmc)
+# remove peaks on nonstandard chromosomes and in genomic blacklist regions
+peaks <- keepStandardChromosomes(peaks, pruning.mode = "coarse")
+peaks <- subsetByOverlaps(x = peaks, ranges = blacklist_hg38_unified, invert = TRUE)
+
+# quantify counts in each peak
+macs2_counts <- FeatureMatrix(
+  fragments = Fragments(pbmc),
+  features = peaks,
+  cells = colnames(pbmc)
+)
+
+# create a new assay using the MACS2 peak set and add it to the Seurat object
+pbmc[["peaks"]] <- CreateChromatinAssay(
+  counts = macs2_counts,
+  fragments = fragpath,
+  annotation = annotation
+)
+
+DefaultAssay(pbmc) <- "RNA"
+pbmc <- SCTransform(pbmc)
+pbmc <- RunPCA(pbmc)
+
+DefaultAssay(pbmc) <- "peaks"
+pbmc <- FindTopFeatures(pbmc, min.cutoff = 5)
+pbmc <- RunTFIDF(pbmc)
+pbmc <- RunSVD(pbmc)
+```
+
+```{r}
+# load PBMC reference
+reference <- LoadH5Seurat("./scANANSE/data/pbmc_multimodal.h5seurat")
+DefaultAssay(pbmc) <- "SCT"
+
+# transfer cell type labels from reference to query
+transfer_anchors <- FindTransferAnchors(
+  reference = reference,
+  query = pbmc,
+  normalization.method = "SCT",
+  reference.reduction = "spca",
+  recompute.residuals = FALSE,
+  dims = 1:50
+)
+
+predictions <- TransferData(
+  anchorset = transfer_anchors, 
+  refdata = reference$celltype.l2,
+  weight.reduction = pbmc[['pca']],
+  dims = 1:50
+)
+
+pbmc <- AddMetaData(
+  object = pbmc,
+  metadata = predictions
+)
+
+# set the cell identities to the cell type predictions
+Idents(pbmc) <- "predicted.id"
+
+# set a reasonable order for cell types to be displayed when plotting
+levels(pbmc) <- c("CD4 Naive", "CD4 TCM", "CD4 CTL", "CD4 TEM", "CD4 Proliferating",
+                  "CD8 Naive", "dnT",
+                 "CD8 TEM", "CD8 TCM", "CD8 Proliferating", "MAIT", "NK", "NK_CD56bright",
+                 "NK Proliferating", "gdT",
+                 "Treg", "B naive", "B intermediate", "B memory", "Plasmablast",
+                 "CD14 Mono", "CD16 Mono",
+                 "cDC1", "cDC2", "pDC", "HSPC", "Eryth", "ASDC", "ILC", "Platelet")
+```
+```{r}
+# build a joint neighbor graph using both assays
+pbmc <- FindMultiModalNeighbors(
+  object = pbmc,
+  reduction.list = list("pca", "lsi"), 
+  dims.list = list(1:50, 2:40),
+  modality.weight.name = "RNA.weight",
+  verbose = TRUE
+)
+
+# build a joint UMAP visualization
+pbmc <- RunUMAP(
+  object = pbmc,
+  nn.name = "weighted.nn",
+  assay = "RNA",
+  verbose = TRUE
+)
+DimPlot(pbmc, label = TRUE, repel = TRUE, reduction = "umap") + NoLegend()
+```
+```{r}
+Idents(pbmc) <- str_replace(Idents(pbmc), ' ', '-')
+Idents(pbmc) <- str_replace(Idents(pbmc), '_', '-')
+pbmc$predicted.id <- str_replace(pbmc$predicted.id, ' ', '-')
+pbmc$predicted.id <- str_replace(pbmc$predicted.id, '_', '-')
+```
+
+
+```{r}
+rds_file <- './scANANSE/preprocessed_PDMC.Rds'
+if(file.exists(rds_file)){
+  pdmc <- readRDS(rds_file)
+}else{saveRDS(pbmc, file = rds_file)}
+
+pdf('./scANANSE/umap.pdf',width=7,height=3.5,paper='special') 
+DimPlot(pbmc, label = TRUE, repel = TRUE, reduction = "umap") + NoLegend()
+dev.off()
+
+table(pbmc@meta.data$predicted.id)
+```
+
+
+```{r}
+#source('/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/markdown_notebooks/R_functions/ANANSE_seurat_wrapper_V2.R')
+#Load pre-processed seurat object RDS file
+source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
+rds_file <- './scANANSE/preprocessed_PDMC.Rds'
+pbmc <- readRDS(rds_file)
+
+export_CPM_scANANSE(pbmc,
+                    min_cells <- 25,
+                    output_dir ='./scANANSE/analysis',
+                    cluster_id = 'predicted.id',
+                    RNA_count_assay = 'RNA')
+
+export_ATAC_scANANSE(pbmc,
+                     min_cells <- 25,
+                     output_dir ='./scANANSE/analysis',
+                    cluster_id = 'predicted.id',
+                    ATAC_peak_assay= 'peaks')
+
+#specify additional contrasts: 
+contrasts <-  list('B-naive_B-memory',
+                   'B-memory_B-naive',
+                   'B-naive_CD16-Mono',
+                   'CD16-Mono_B-naive')
+
+config_scANANSE(pbmc,
+                min_cells <- 25,
+                output_dir ='./scANANSE/analysis',
+                cluster_id = 'predicted.id',
+                genome = './scANANSE/data/hg38',
+                additional_contrasts = contrasts)
+
+DEGS_scANANSE(pbmc,
+              min_cells <- 25,
+              output_dir ='./scANANSE/analysis',
+              cluster_id = 'predicted.id',
+              additional_contrasts = contrasts)
+
+```
+
+## Run Anansnake before processing
+Lets load the results from Anansnake
+```{r}
+source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
+
+rds_file <- './scANANSE/preprocessed_PDMC.Rds'
+pbmc <- readRDS(rds_file)
+cluster_id = 'predicted.id'
+
+setwd("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/")
+pbmc <- import_seurat_scANANSE(pbmc,
+                               cluster_id = 'predicted.id',
+                               anansnake_inf_dir= "./scANANSE/analysis/influence/")
+
+TF_influence <- per_cluster_df(pbmc, 
+                               cluster_id = 'predicted.id', 
+                               assay = 'influence')
+
+```
+
+get top 5 highest TFs
+```{r}
+TF_influence$TF <- rownames(TF_influence)
+TF_long <- reshape2::melt(TF_influence, id.vars = 'TF')
+TF_influence$TF <- NULL
+colnames(TF_long) <- c('TF','cluster', 'influence')
+TF_long <- TF_long[order(TF_long$influence, decreasing = TRUE), ]
+
+#get the top n TFs per cluster
+topTF <- Reduce(rbind,                                 
+                    by(TF_long,
+                       TF_long["cluster"],
+                       head,
+                       n = 5))# Top N highest TFs by cluster
+
+top_TFs <- unique(topTF$TF)
+  
+TF_table <- topTF %>% 
+  dplyr::group_by(cluster) %>% 
+  dplyr::mutate('TopTFs' = paste0(TF, collapse = " ")) 
+
+unique(TF_table[,c('cluster','TopTFs')])
+```
+
+```{r}
+library(ComplexHeatmap)
+library(circlize)
+col_fun = colorRamp2(c(0, 1), c("white", "orange"))
+mat <- TF_influence[rownames(TF_influence) %in% top_TFs,]
+
+pdf('./scANANSE/analysis/ANANSE_Heatmap.pdf',width=16,height=8,paper='special')
+Heatmap(mat, col = col_fun)
+dev.off()
+```
+
+
+Generate a Heatmap of the top TFs
+```{r}
+set.seed(123)
+DefaultAssay(object = pbmc) <- "influence"
+mat <- TF_influence[rownames(TF_influence) %in% top_TFs,]
+
+col_fun = colorRamp2(c(0, 1), c("white", "orange"))
+costum_sample_order = c('CD14-Mono','CD16-Mono','cDC2','pDC','HSPC','B-naive','B-intermediate','B-memory','CD8-Naive','CD4-Naive','CD8-TCM','CD4-TEM','CD4-TCM','Treg','MAIT','CD8-TEM','gdT','NK')
+
+dend <- stats::as.dendrogram(stats::hclust(dist(t(mat))))
+#dend <-dendextend::rotate(dend,costum_sample_order) #rotate to match labels new order}
+
+pdf("./scANANSE/analysis/ANANSE_Heatmap.pdf" ,width=16,height=8,paper='special')
+print(ComplexHeatmap::Heatmap(mat,
+                        row_dend_side = "right",
+                        show_column_dend = T,
+                        col = col_fun,
+                        cluster_columns = dend,
+                        row_km_repeats = 100))
+dev.off()
+```
+
+```{r}
+pdf('./scANANSE/analysis/reference_umap.pdf',width=15,height=15,paper='special') 
+Idents(object = reference) <- "celltype.l2"
+print(DimPlot(reference, label = T, repel = TRUE, reduction = "umap") )
+Idents(object = reference) <- "celltype.l1"
+print(DimPlot(reference, label = T, repel = TRUE, reduction = "umap") )
+dev.off()
+
+pdf('./scANANSE/analysis/ANANSE_umap.pdf',width=10,height=5,paper='special') 
+Idents(object = pbmc) <- "predicted.id"
+print(DimPlot(pbmc, label = T, repel = TRUE, reduction = "umap")+ NoLegend())
+dev.off()
+```
+
+
+```{r}
+highlight_TF1 <- c('STAT4','LEF1','MEF2C')
+
+pdf('./scANANSE/analysis/ANANSE_highlight.pdf',width=10,height=10,paper='special') 
+DefaultAssay(object = pbmc) <- "RNA"
+plot_expression1 <- FeaturePlot(pbmc, features = highlight_TF1, ncol = 1)
+DefaultAssay(object = pbmc) <- "influence"
+plot_ANANSE1 <- FeaturePlot(pbmc,ncol = 1, features = highlight_TF1, cols = c("darkgrey", "#fc8d59"))
+print(DimPlot(pbmc, label = T, repel = TRUE, reduction = "umap")+ NoLegend())
+print(plot_expression1|plot_ANANSE1)
+dev.off()
+```
+Lets finally also output the ATAC counts for motif enrichment
+```{r}
+export_ATAC_maelstrom(pbmc,
+              min_cells <- 25,
+              output_dir ='./scANANSE/analysis',
+              cluster_id = 'predicted.id')
+```
+
+#run gimme maelstrom using:
+```{bash}
+#conda create -n gimme python=3 gimmemotifs
+# Activate the environment
+#conda activate gimme
+#gimme maelstrom scANANSE/analysis/Peaks_scaled.tsv hg38 scANANSE/analysis/maelstrom --all-motif-plots
+
+```
+
+import motif enrichment:
+```{r}
+rds_file <- './scANANSE/preprocessed_PDMC.Rds'
+pbmc <- readRDS(rds_file)
+#is.null(pbmc@assays[['test']])
+getwd()
+
+source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
+pbmc <- import_seurat_maelstrom(pbmc,
+              cluster_id = 'predicted.id',
+              maelstrom_dir = './scANANSE/analysis/maelstrom/')
+
+motif_scores <- per_cluster_df(pbmc,
+                                 assay = 'maelstrom',
+                                 cluster_id = 'predicted.id')
+head(motif_scores)
+```
+
+```{r}
+source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
+pbmc <- Maelstrom_Motif2TF(pbmc,
+                         cluster_id = 'predicted.id',
+                         maelstrom_dir = './scANANSE/analysis/maelstrom',
+                         RNA_expression_assay = "SCT",
+                         output_dir ='./scANANSE/analysis',
+                         expr_tresh = 100,
+                         cor_tresh = 0.3,
+                         combine_motifs = 'max_cor'
+                         )
+
+act_t <- per_cluster_df(pbmc, assay = 'TFcor', cluster_id = 'predicted.id')
+negcor_TFs <- per_cluster_df(pbmc, assay = 'TFanticor', cluster_id = 'predicted.id')
+top_pTFs <- head(pbmc@assays[["TFcor"]][[]],15)
+top_nTFs <- head(pbmc@assays[["TFanticor"]][[]],15)
+
+cluster_order <- c('CD14-Mono','CD16-Mono',"cDC2","pDC","HSPC","B-naive","B-intermediate","B-memory","CD4-Naive","CD8-Naive","CD8-TCM","CD4-TEM","Treg","CD8-TEM" ,"MAIT","gdT","NK")
+```
+
+```{r}
+col_fun <- circlize::colorRamp2(c(-5,0,5), c('#998ec3','white','#f1a340'))
+col_fun_cor <- circlize::colorRamp2(c(-1,0,1), c('#7b3294','#f7f7f7','#008837'))
+
+pdf('./scANANSE/analysis/Maelstrom_correlations.pdf',width=8,height=5,paper='special') 
+
+for (regtype in c('TFcor','TFanticor')){
+  top_TFs <- head(pbmc@assays[[regtype]][[]],15)
+  mat <- per_cluster_df(pbmc, assay = regtype, cluster_id = 'predicted.id')
+  mat <- mat[rownames(mat) %in% rownames(top_TFs),]
+
+  #get TF expression matrix
+  exp_mat <- AverageExpression(pbmc,assay='SCT',slot = 'data', features = rownames(top_TFs), group.by = 'predicted.id')[[1]]
+  exp_mat <- exp_mat[,colnames(exp_mat)]
+  exp_mat <-  t(scale(t(exp_mat)))
+  #get correlation score
+  row_ha = rowAnnotation(correlation = top_TFs$cor, col = list(correlation = col_fun_cor))
+  print(Heatmap(exp_mat[,cluster_order], cluster_columns = F) + Heatmap(mat[,cluster_order], col = col_fun, cluster_columns = F, right_annotation = row_ha))
+  }
+
+dev.off()
+```
+```{r}
+
+test <-  c('darkred','white','grey')
+test[1]
+
+source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
+
+TF_list <- c('PAX5','STAT6','ETS1','GATA3','MAX')
+pdf('./scANANSE/analysis/Factor_Motif_TFanticor.pdf',width=8,height=8,paper='special') 
+Factor_Motif_Plot2(pbmc, TF_list, assay_maelstrom = 'TFanticor', logo_dir = './scANANSE/analysis/maelstrom/logos/',col = c('darkred','white','grey'))
+dev.off()
+
+TF_list <- c('MEF2C','TCF7','ETS1','GATA3','MAX')
+pdf('./scANANSE/analysis/Factor_Motif_TFcor.pdf',width=8,height=8,paper='special') 
+Factor_Motif_Plot2(pbmc, TF_list, assay_maelstrom = 'TFcor', logo_dir = './scANANSE/analysis/maelstrom/logos/', col = c('grey','white','darkgreen'))
+dev.off()
+
+```
+
+
+```{r}
+Factor_Motif_Plot <- function(suerat_object,
+                                TF_list,
+                                assay_RNA = 'RNA',
+                                assay_maelstrom = 'TFanticor',
+                                logo_dir = '~/maelstrom/logos',
+                                col = c('darkred','darkgrey')){
+  DefaultAssay(object = suerat_object) <- assay_RNA
+  plot_assay1 <- Seurat::FeaturePlot(suerat_object, features = TF_list, ncol = 1, reduction = "umap")
+  DefaultAssay(object = suerat_object) <- assay_maelstrom
+  plot_Maelstrom_raw <- FeaturePlot(suerat_object,ncol = 1, features = TF_list, cols = col, combine = F)
+
+  #replace the TF name with the motif name for the maelstrom enrichment score
+  plot_Maelstrom <- lapply(plot_Maelstrom_raw, function(x){
+    TF_name <- names(x$data)[4][[1]]
+    motif_name <- TF_motif_table[TF_name,]$Motif
+    x + ggplot2::labs(title = motif_name)
+    })
+  plot_Maelstrom <- patchwork::wrap_plots(plot_Maelstrom, ncol = 1)
+  plot_logo <- lapply(plot_Maelstrom_raw, function(x){
+    TF_name <- names(x$data)[4][[1]]
+    motif_name <- TF_motif_table[TF_name,]$Motif
+    motif_name <- gsub('\\.','_',motif_name)
+    motif_path <- paste0(logo_dir,motif_name,'.png')
+    logo_image <- png::readPNG(motif_path)
+    ggplot2::ggplot() + ggpubr::background_image(logo_image) #+ ggplot2::coord_fixed()
+    })
+  plot_logo <- patchwork::wrap_plots(plot_logo, ncol = 1)
+  return(plot_expression1|plot_Maelstrom|plot_logo)
+}
+```
+
+```{r}
+
+
+
+highlight_TF1 <- c('PAX5','STAT6','ETS1','LMO2')
+TF_motif_table <- pbmc@assays[["TFanticor"]][[]]
+highlight_TF1 <- highlight_TF1[highlight_TF1 %in% rownames(TF_motif_table)]
+
+DefaultAssay(object = pbmc) <- "RNA"
+plot_expression1 <- FeaturePlot(pbmc, features = highlight_TF1, ncol = 1, reduction = "umap")
+DefaultAssay(object = pbmc) <- "TFanticor"
+logo_dir <- './scANANSE/analysis/maelstrom/logos/'
+plot_Maelstrom_raw <- FeaturePlot(pbmc,ncol = 1, features = highlight_TF1, cols = c("darkred","darkgrey"), combine = F)
+
+#replace the TF name with the motif name for the maelstrom enrichment score
+plot_Maelstrom <- lapply(plot_Maelstrom_raw, function(x){
+  TF_name <- names(x$data)[4][[1]]
+  motif_name <- TF_motif_table[TF_name,]$Motif
+  x + ggplot2::labs(title = motif_name)
+  })
+plot_Maelstrom <- patchwork::wrap_plots(plot_Maelstrom, ncol = 1)
+plot_logo <- lapply(plot_Maelstrom_raw, function(x){
+  TF_name <- names(x$data)[4][[1]]
+  motif_name <- TF_motif_table[TF_name,]$Motif
+  motif_name <- gsub('\\.','_',motif_name)
+  motif_path <- paste0(logo_dir,motif_name,'.png')
+  logo_image <- png::readPNG(motif_path)
+  ggplot2::ggplot() + ggpubr::background_image(logo_image) #+ ggplot2::coord_fixed()
+  })
+plot_logo <- patchwork::wrap_plots(plot_logo, ncol = 1)
+
+pdf('./scANANSE/analysis/repressive_motifs.pdf' ,width=10,height=10,paper='special') 
+print(plot_expression1|plot_Maelstrom|plot_logo)
+dev.off()
+```
+
+```{r}
+logo_dir <- './scANANSE/analysis/maelstrom/logos/'
+
+plot_expression1 <- FeaturePlot(pbmc, features = highlight_TF1, ncol = 1, reduction = 'umap')
+plot_Maelstrom_raw <- FeaturePlot(test,ncol = 1, features = highlight_TF1, cols = c("darkred","darkgrey"), combine = F)
+#replace the TF name with the motif name for the maelstrom enrichment score
+plot_Maelstrom <- lapply(plot_Maelstrom_raw, function(x){
+  TF_name <- names(x$data)[4][[1]]
+  motif_name <- TF_motif_table[TF_name,]$Motif
+  x + ggplot2::labs(title = motif_name)
+  })
+plot_Maelstrom <- patchwork::wrap_plots(plot_Maelstrom, ncol = 1)
+plot_logo <- lapply(plot_Maelstrom_raw, function(x){
+  TF_name <- names(x$data)[4][[1]]
+  motif_name <- TF_motif_table[TF_name,]$Motif
+  motif_name <- gsub('\\.','_',motif_name)
+  motif_path <- paste0(logo_dir,motif_name,'.png')
+  logo_image <- png::readPNG(motif_path)
+  return(ggplot2::ggplot() + ggpubr::background_image(logo_image) + ggplot2::coord_fixed())
+  })
+plot_logo <- patchwork::wrap_plots(plot_logo, ncol = 1)
+
+print(plot_expression1|plot_Maelstrom|plot_logo)
+```
+
+
+
+
