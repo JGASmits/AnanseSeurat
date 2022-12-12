@@ -22,7 +22,7 @@ DEGS_scANANSE(
 
 \item{cluster_id}{ID used for finding clusters of cells}
 
-\item{RNA_count_assay}{assay of the seurat object containing the RNA count data}
+\item{RNA_count_assay}{assay containing the RNA data}
 
 \item{additional_contrasts}{additional contrasts to add between clusters within cluster_ID}
 }

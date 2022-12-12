@@ -11,7 +11,11 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports: 
     dplyr,
+    ggplot2,
+    ggpubr,
     magrittr,
+    patchwork,
+    png,
     purrr,
     rlang,
     Seurat,

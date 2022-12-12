@@ -333,7 +333,7 @@ export_ATAC_maelstrom(pbmc,
 #conda create -n gimme python=3 gimmemotifs
 # Activate the environment
 #conda activate gimme
-#gimme maelstrom scANANSE/analysis/Peaks_scaled.tsv hg38 scANANSE/analysis/maelstrom
+#gimme maelstrom scANANSE/analysis/Peaks_scaled.tsv hg38 scANANSE/analysis/maelstrom --all-motif-plots
 
 ```
 
@@ -342,6 +342,7 @@ import motif enrichment:
 rds_file <- './scANANSE/preprocessed_PDMC.Rds'
 pbmc <- readRDS(rds_file)
 #is.null(pbmc@assays[['test']])
+getwd()
 
 source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
 pbmc <- import_seurat_maelstrom(pbmc,
@@ -351,7 +352,7 @@ pbmc <- import_seurat_maelstrom(pbmc,
 motif_scores <- per_cluster_df(pbmc,
                                  assay = 'maelstrom',
                                  cluster_id = 'predicted.id')
-
+head(motif_scores)
 ```
 
 ```{r}
@@ -403,12 +404,12 @@ test[1]
 
 source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
 
-TF_list <- c('PAX5','STAT6','ETS1','GATA3')
+TF_list <- c('PAX5','STAT6','ETS1','GATA3','MAX')
 pdf('./scANANSE/analysis/Factor_Motif_TFanticor.pdf',width=8,height=8,paper='special') 
 Factor_Motif_Plot2(pbmc, TF_list, assay_maelstrom = 'TFanticor', logo_dir = './scANANSE/analysis/maelstrom/logos/',col = c('darkred','white','grey'))
 dev.off()
 
-TF_list <- c('MEF2C','TCF7','ETS1','GATA3')
+TF_list <- c('MEF2C','TCF7','ETS1','GATA3','MAX')
 pdf('./scANANSE/analysis/Factor_Motif_TFcor.pdf',width=8,height=8,paper='special') 
 Factor_Motif_Plot2(pbmc, TF_list, assay_maelstrom = 'TFcor', logo_dir = './scANANSE/analysis/maelstrom/logos/', col = c('grey','white','darkgreen'))
 dev.off()
