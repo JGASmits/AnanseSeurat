@@ -315,7 +315,6 @@ import_seurat_scANANSE <- function(seurat_object,
       i = i + 1
     }
   }
-
   avg_df <- influence_scores_avg %>% purrr::reduce(dplyr::full_join, by = "factor", copy = T)
   avg_df[is.na(avg_df)] = 0
   rownames(avg_df) <- avg_df$factor
@@ -344,14 +343,16 @@ import_seurat_scANANSE <- function(seurat_object,
   cell_barcodes_all <- rownames(as.data.frame(Seurat::Idents(object = seurat_object)))
   cell_barcodes_missing <- cell_barcodes_all[!cell_barcodes_all %in% rownames(TF_array)]
   cell_barcodes_missing <- as.data.frame(cell_barcodes_missing)
-  for (TF in colnames(TF_signal)){
-    cell_barcodes_missing[[TF]] <- NA
-  }
-  rownames(cell_barcodes_missing) <- cell_barcodes_missing$cell_barcodes_missing
-  cell_barcodes_missing$cell_barcodes_missing <- NULL
-
-  TF_output <- t(rbind(TF_array,cell_barcodes_missing))
-
+  if (length(cell_barcodes_missing > 0)){
+    print('adding cells with no influence scores with NA')
+    for (TF in colnames(TF_signal)){
+      cell_barcodes_missing[[TF]] <- NA
+    }
+    rownames(cell_barcodes_missing) <- cell_barcodes_missing$cell_barcodes_missing
+    cell_barcodes_missing$cell_barcodes_missing <- NULL
+    TF_output <- t(rbind(TF_array,cell_barcodes_missing))}
+  else{
+    TF_output <- t(TF_array)}
   seurat_object[['influence']] <- Seurat::CreateAssayObject(TF_output)
   if (return_df){return(list(seurat_object,avg_df))}
   else{return(seurat_object)}
