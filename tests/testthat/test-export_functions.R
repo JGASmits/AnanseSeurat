@@ -85,6 +85,24 @@ test_that("Config and sample file are sucessfully generated", {
   expect_true(all.equal(samples_correct, samples_df))
 })
 
-testthat::test_path("config.yaml")
+test_that("Maelstrom count matrix is sucessfully generated", {
+  peakfile = paste0(tempdir(),'/Peaks_scaled.tsv')
+  on.exit(unlink(c(peakfile)))
+  expect_false(file.exists(peakfile))
 
-scan(testthat::test_path("config.yaml"), what = '', sep='\n')
+  #load dummy single cell object
+  sce <- readRDS(testthat::test_path("sce_obj.Rds"))
+
+  export_ATAC_maelstrom(seu_test,
+                        min_cells <- 1,
+                        output_dir =tempdir(),
+                        cluster_id = 'seurat_clusters',
+                        ATAC_peak_assay = 'peaks')
+
+  expect_true(file.exists(peakfile))
+
+  #check if the sample fileis  equal to the expected output
+  peaks_correct <- read.table(testthat::test_path("Peaks_scaled.tsv"))
+  peaks_df <- read.table(peakfile)
+  expect_true(all.equal(peaks_correct, peaks_df))
+})
