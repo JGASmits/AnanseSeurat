@@ -93,7 +93,7 @@ test_that("Maelstrom count matrix is sucessfully generated", {
   #load dummy single cell object
   sce <- readRDS(testthat::test_path("sce_obj.Rds"))
 
-  export_ATAC_maelstrom(seu_test,
+  export_ATAC_maelstrom(sce,
                         min_cells <- 1,
                         output_dir =tempdir(),
                         cluster_id = 'seurat_clusters',
