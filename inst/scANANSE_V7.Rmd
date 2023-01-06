@@ -320,22 +320,33 @@ print(DimPlot(pbmc, label = T, repel = TRUE, reduction = "umap")+ NoLegend())
 print(plot_expression1|plot_ANANSE1)
 dev.off()
 ```
-Lets finally also output the ATAC counts for motif enrichment
+
+Lets vizualise the influence results of a specific contrast:
 ```{r}
-export_ATAC_maelstrom(pbmc,
-              min_cells <- 25,
-              output_dir ='./scANANSE/analysis',
-              cluster_id = 'predicted.id')
+library(ggplot2)
+MemoryInfluence <- read.table('./scANANSE/analysis/influence/anansesnake_B-memory_B-naive.tsv', header = T)
+NaiveInfluence <- read.table('./scANANSE/analysis/influence/anansesnake_B-naive_B-memory.tsv', header = T)
+
+NaiveInfluence$factor_fc <- NaiveInfluence$factor_fc* -1
+B_comparison <- rbind(NaiveInfluence,MemoryInfluence)
+
+
+
+B_comparison_plot <- ggplot(B_comparison, aes(factor_fc,influence_score)) + 
+  geom_point(aes(size = direct_targets, colour = influence_score)) +
+  xlim(-2,2)+
+  geom_text(aes(label=ifelse(factor_fc > 0.26|factor_fc < -0.5, as.character(factor),""), hjust = 0.5, vjust = 2))
+
+pdf('./scANANSE/analysis/B_comparison_plot.pdf',width=8,height=3.5,paper='special') 
+print(B_comparison_plot)
+dev.off()
+
 ```
 
-#run gimme maelstrom using:
-```{bash}
-#conda create -n gimme python=3 gimmemotifs
-# Activate the environment
-#conda activate gimme
-#gimme maelstrom scANANSE/analysis/Peaks_scaled.tsv hg38 scANANSE/analysis/maelstrom --all-motif-plots
-
+```{r}
+2^-8
 ```
+
 
 import motif enrichment:
 ```{r}
