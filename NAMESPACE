@@ -2,7 +2,7 @@
 
 export("%>%")
 export(DEGS_scANANSE)
-export(Factor_Motif_Plot2)
+export(Factor_Motif_Plot)
 export(Maelstrom_Motif2TF)
 export(config_scANANSE)
 export(export_ATAC_maelstrom)
