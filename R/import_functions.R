@@ -81,7 +81,6 @@ import_seurat_scANANSE <- function(seurat_object,
 
 }
 
-
 #' import_seurat_Maelstrom
 #'
 #' load Maelstrom enriched motifs
@@ -142,3 +141,40 @@ import_seurat_maelstrom <- function(seurat_object,
   if (return_df){return(list(seurat_object,motif_df))}
   else{return(seurat_object)}
 }
+
+
+#' per_cluster_df
+#'
+#' generate a table of the assay score averages per cluster identifier cell
+#' @param seurat_object seurat object
+#' @param assay assay containing influence or motif scores generated from cluster pseudobulk
+#' @param cluster_id ID used for finding clusters of cells
+#' @export
+per_cluster_df <- function(seurat_object,
+                           assay = 'influence',
+                           cluster_id = 'seurat_clusters'){
+  Seurat::Idents(seurat_object) <- cluster_id
+  #make a dataframe with the values per cluster:
+  clusters <- unique(seurat_object[[cluster_id]])
+  #print(clusters)
+
+  #check if assay exists
+  if(is.null(seurat_object@assays[[assay]])){
+    stop(paste0('assay ', assay, ' not found in the seurat object '))
+  }
+  cluster_data <- as.data.frame(rownames(seurat_object@assays[[assay]]@data))
+  rownames(cluster_data) <- cluster_data[[1]]
+
+  for (cluster in unique(seurat_object[[cluster_id]])[[cluster_id]]){
+    seurat_object_subset <- subset(x = seurat_object, idents = cluster)
+    #get cluster data
+    cluster_matrix <- as.data.frame(seurat_object_subset@assays[[assay]]@data)
+    if(length(unique(as.list(cluster_matrix))) != 1){
+      print(paste0('not all cells of the cluster ', cluster, ' have the same value in the assay ',assay))
+    }
+    cluster_data[cluster] <- rowMeans(cluster_matrix)
+
+  }
+  cluster_data[[1]] <- NULL
+  cluster_data <- cluster_data[,colSums(is.na(cluster_data))<nrow(cluster_data)]#remove columns with NAs
+  return(cluster_data)}

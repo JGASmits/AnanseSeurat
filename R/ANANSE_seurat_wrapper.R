@@ -127,7 +127,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
                                cluster_id = cluster_id)
     mot_mat <- as.matrix(mot_mat)
   }
-  
+
   ## Set up Seurat object
   print("non-expressed genes are removed")
   Seurat::DefaultAssay(seurat_object) <- RNA_expression_assay
@@ -142,7 +142,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
     print("Your data slot was not yet normalized.")
     print(paste0("Seurat NormalizeData with default settings will be run on all the genes in the ", RNA_expression_assay, " assay."))
     seurat_object <- Seurat::NormalizeData(seurat_object, assay = RNA_expression_assay)
-  
+
   }
 
   ## Obtain df with mean expression
@@ -163,7 +163,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
   m2f_df_match <- m2f_df[m2f_df$Motif %in% rownames(mot_mat) & m2f_df$Factor %in% rownames(TF_mat),]
   ## Creat unique motif-factor entries, losing curation information
   m2f_df_match <- unique(m2f_df_match[,!colnames(m2f_df_match) %in% c("Evidence", "Curated")])
-  
+
   ## perform correlations between cluster expression and cluster motif enrichment
   ## calculate motif score variation over clusters
   m2f_df_match$cor <- NA
@@ -172,11 +172,11 @@ Maelstrom_Motif2TF <- function(seurat_object,
     m2f_df_match$cor[i] <- stats::cor(mot_mat[m2f_df_match$Motif[i],],exp_mat[m2f_df_match$Factor[i],], method = cor_method)
     m2f_df_match$var[i] <- stats::var(mot_mat[m2f_df_match$Motif[i],])
   }
-  
+
   ## Only keep motif-TF combinations with an absolute R higher than treshold
   print(paste0("Only keep motif-TF combinations with an R > ", cor_tresh))
   m2f_df_match <- m2f_df_match[base::abs(m2f_df_match$cor) > cor_tresh,]
-  
+
   ## Select highest absolute correlation of TF and motif
   m2f_df_unique <- as.data.frame(m2f_df_match %>% dplyr::group_by(m2f_df_match$Motif) %>%
     dplyr::arrange(dplyr::desc(base::abs(m2f_df_match$cor))) %>% dplyr::filter(dplyr::row_number() == 1))
@@ -196,7 +196,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
       m2f <- m2f_df_unique[m2f_df_unique$cor > 0,]
       #print(paste0('total m2f', length(m2f$cor)))
     }
-    
+
     m2f$associated_motifs <- NA
     for (tf in unique(m2f$Factor)){
       ## Generate a string with all associated motifs and their correlation to the tf
@@ -220,7 +220,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
       m2f <- as.data.frame(m2f[!duplicated(m2f$Factor), c("Factor","associated_motifs"), drop = FALSE])
     }
     if(combine_motifs == 'max_cor') {
-      print("Motif best (absolute) correlated to expression is selected per TF") 
+      print("Motif best (absolute) correlated to expression is selected per TF")
       ## Using m2f file for selecting highest correlating motif to factor:
       m2f <- m2f[order(base::abs(m2f[,"cor"]), decreasing = T),, drop = FALSE]
       m2f <- m2f[!duplicated(m2f$Factor),c("Factor","Motif","cor"), drop = FALSE]
@@ -263,7 +263,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
         new_assay[TF,cluster_cells] <- as.matrix(mot_plot[TF,cluster])
       }
     }
-  
+
     seurat_object[[typeTF]] <- Seurat::CreateAssayObject(new_assay)
     ## Adding meta.features with information about the motifs used in the matrix
     m2f <- as.data.frame(m2f[match(rownames(new_assay), m2f$Factor),])
@@ -275,42 +275,6 @@ Maelstrom_Motif2TF <- function(seurat_object,
   if (return_df){return(list(seurat_object,matrix_list))}
   else{return(seurat_object)}
 }
-
-#' per_cluster_df
-#'
-#' generate a table of the assay score averages per cluster identifier cell
-#' @param seurat_object seurat object
-#' @param assay assay containing influence or motif scores generated from cluster pseudobulk
-#' @param cluster_id ID used for finding clusters of cells
-#' @export
-per_cluster_df <- function(seurat_object,
-                           assay = 'influence',
-                           cluster_id = 'seurat_clusters'){
-
-  #make a dataframe with the values per cluster:
-  clusters <- unique(seurat_object[[cluster_id]])
-  #print(clusters)
-
-  #check if assay exists
-  if(is.null(seurat_object@assays[[assay]])){
-    stop(paste0('assay ', assay, ' not found in the seurat object '))
-  }
-  cluster_data <- as.data.frame(rownames(seurat_object@assays[[assay]]@data))
-  rownames(cluster_data) <- cluster_data[[1]]
-
-  for (cluster in unique(seurat_object[[cluster_id]])[[cluster_id]]){
-    seurat_object_subset <- subset(x = seurat_object, idents = cluster)
-    #get cluster data
-    cluster_matrix <- as.data.frame(seurat_object_subset@assays[[assay]]@data)
-    if(length(unique(as.list(cluster_matrix))) != 1){
-      print(paste0('not all cells of the cluster ', cluster, ' have the same value in the assay ',assay))
-    }
-    cluster_data[cluster] <- rowMeans(cluster_matrix)
-
-  }
-  cluster_data[[1]] <- NULL
-  cluster_data <- cluster_data[,colSums(is.na(cluster_data))<nrow(cluster_data)]#remove columns with NAs
-  return(cluster_data)}
 
 #' Factor_Motif_Plot
 #'
@@ -331,14 +295,14 @@ Factor_Motif_Plot <- function(seurat_object,
   Seurat::DefaultAssay(object = seurat_object) <- assay_RNA
   plot_expression1 <- Seurat::FeaturePlot(seurat_object, features = TF_list, ncol = 1, reduction = "umap")
   Seurat::DefaultAssay(object = seurat_object) <- assay_maelstrom
-  plot_Maelstrom_raw <- Seurat::FeaturePlot(seurat_object,ncol = 1, features = TF_list, combine = F) 
+  plot_Maelstrom_raw <- Seurat::FeaturePlot(seurat_object,ncol = 1, features = TF_list, combine = F)
   TF_motif_table <- seurat_object@assays[[assay_maelstrom]][[]]
 
   #replace the TF name with the motif name for the maelstrom enrichment score
   plot_Maelstrom <- lapply(plot_Maelstrom_raw, function(x){
     TF_name <- names(x$data)[4][[1]]
     motif_name <- TF_motif_table[TF_name,]$Motif
-    x = x + ggplot2::labs(title = motif_name) 
+    x = x + ggplot2::labs(title = motif_name)
     x + ggplot2::scale_colour_gradient2(low = col[1], mid = col[2], high = col[3], midpoint = 0)
     })
   plot_Maelstrom <- patchwork::wrap_plots(plot_Maelstrom , ncol = 1)
