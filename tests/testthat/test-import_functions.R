@@ -1,6 +1,6 @@
 #test_functions
 
-test_that("import seurat succesfully imports a influence file, wich contains an influence assay", {
+test_that("import seurat succesfully imports an influence file, wich contains an influence assay", {
   #load dummy single cell object
   sce <- readRDS(testthat::test_path("sce_obj.Rds"))
   sce <- import_seurat_scANANSE(sce,
@@ -13,6 +13,19 @@ test_that("import seurat succesfully imports a influence file, wich contains an 
   expect_true(all.equal(inf_df,inf_correct,tolerance = 1.0e-7))
 
   })
+
+test_that("import maelstrom succesfully imports a maelstrom file, wich contains an motif enrichment scores", {
+  #load dummy single cell object
+  sce <- readRDS(testthat::test_path("sce_obj.Rds"))
+  sce <- import_seurat_maelstrom(sce,
+                                cluster_id = 'seurat_clusters',
+                                maelstrom_file = testthat::test_path('final.out.txt'))
+  expect_true(length(sce@assays) == 3)
+  expect_true('maelstrom' %in% names(sce@assays))
+  maelstrom_df<- as.data.frame(sce@assays$maelstrom@data)
+  maelstrom_correct <- read.table(testthat::test_path("maelstrom_table.tsv"))
+  expect_true(all.equal(maelstrom_df,maelstrom_correct))
+})
 
 test_that("per cell df works", {
   #load dummy single cell object

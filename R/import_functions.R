@@ -86,16 +86,15 @@ import_seurat_scANANSE <- function(seurat_object,
 #' load Maelstrom enriched motifs
 #' @param seurat_object object
 #' @param cluster_id ID used for finding clusters of cells
-#' @param maelstrom_dir directory where the maelstrom results are stored
+#' @param maelstrom_file maelstrom final.out.txt file
 #' @param return_df return both the seurat object and a dataframe with maelstrom scores as a list
 #' @export
 import_seurat_maelstrom <- function(seurat_object,
                                     cluster_id = 'seurat_clusters',
-                                    maelstrom_dir = '~/',
+                                    maelstrom_file = '~/final.out.txt',
                                     return_df = F
 
 ){
-  maelstrom_file <- paste0(maelstrom_dir,"final.out.txt")
   maelstrom_df <- utils::read.table(maelstrom_file, header = T,row.names=1, sep = '\t',check.names=FALSE)
   rownames(maelstrom_df) <- gsub('_', '-',rownames(maelstrom_df))
   maelstrom_Zscore <- maelstrom_df[grep("z-score ", colnames(maelstrom_df))]
