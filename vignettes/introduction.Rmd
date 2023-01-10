@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 knitr::opts_chunk$set(fig.width=7, fig.height=5) 
-knitr::opts_knit$set(root.dir = normalizePath("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeuratTesting/"))
+#knitr::opts_knit$set(root.dir = normalizePath("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeuratTesting/"))
 ```
 
 #### **Load your single cell object(s)**
