@@ -78,7 +78,6 @@ import_seurat_scANANSE <- function(seurat_object,
   seurat_object[['influence']] <- Seurat::CreateAssayObject(TF_output)
   if (return_df){return(list(seurat_object,avg_df))}
   else{return(seurat_object)}
-
 }
 
 #' import_seurat_Maelstrom
@@ -140,7 +139,6 @@ import_seurat_maelstrom <- function(seurat_object,
   if (return_df){return(list(seurat_object,motif_df))}
   else{return(seurat_object)}
 }
-
 
 #' per_cluster_df
 #'
