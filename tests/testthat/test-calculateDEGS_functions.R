@@ -3,7 +3,7 @@
 test_that("DEGS are called from the single cell object", {
 
   #load dummy single cell object
-  sce <- readRDS(testthat::test_path("sce_DEG_obj.Rds"))
+  sce <- readRDS(testthat::test_path("sce_obj.Rds"))
   DEG_dir = paste0(tempdir(),'/deseq2')
   print(DEG_dir)
   on.exit(unlink(DEG_dir, recursive = T))

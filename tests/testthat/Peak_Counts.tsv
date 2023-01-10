@@ -1,6 +1,6 @@
 cluster1	cluster2	cluster3	average
-chrom1:1000-1200	2	0	0	1
-chrom1:4000-4200	1	2	2	2
-chrom10:1-201	1	1	2	1
-chrom11:4723-4923	1	0	2	1
-chrom1:1100-1300	0	2	2	1
+chrom1:1000-1200	2	1	4	2
+chrom1:4000-4200	4	2	4	3
+chrom10:1-201	3	5	0	3
+chrom11:4723-4923	2	1	0	1
+chrom1:1100-1300	3	0	5	3

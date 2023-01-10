@@ -1,0 +1,6 @@
+cluster1	cluster2	cluster3	average
+gene1	0	3000	0	1000
+gene2	0	3000	304	1101
+gene3	200	2000	144	781
+gene4	300	0	173	158
+gene5	300	0	0	100
