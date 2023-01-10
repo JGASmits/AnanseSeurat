@@ -7,6 +7,8 @@
 
 
 The `AnanseSeurat` package takes pre-processed clustered single cell objects of scRNAseq and scATACseq or a multiome combination, and generates files for gene regulatory network (GRN) analysis.
+For the vignette see: http://htmlpreview.github.io/?https://github.com/JGASmits/AnanseSeurat/blob/main/inst/introduction.html
+
 
 ### Installation
 
