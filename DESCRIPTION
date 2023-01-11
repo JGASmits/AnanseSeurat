@@ -1,5 +1,5 @@
 Package: AnanseSeurat
-Title: Single cell ANANSE Gene-regulatory-network analysis from Seurat objects 
+Title: Single-cell ANANSE Gene-regulatory-network analysis Seurat objects 
 Version: 1.1.0.0
 Authors@R: c(
     person("Jos", "Smits", , "J.Smits@science.ru.nl", role = c("aut", "cre"),
