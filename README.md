@@ -1,6 +1,6 @@
 ## `AnanseSeurat` package
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/JGASmits/AnanseSeuratWrapper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JGASmits/AnanseSeuratWrapper/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/JGASmits/AnanseSeurat/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JGASmits/AnanseSeuratWrapper/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/github/JGASmits/AnanseSeurat/branch/main/graph/badge.svg?token=0XKWAD0KJ7)](https://codecov.io/github/JGASmits/AnanseSeurat)
 <!-- badges: end -->
 ### Export single cell RNA&ATACseq data from a seurat object for ANANSE GRN analysis
