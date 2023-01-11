@@ -24,8 +24,12 @@ export_CPM_scANANSE(
 \item{cluster_id}{ID used for finding clusters of cells}
 }
 \value{
-CPM and count files
+None, outputs CPM and count files in the output directory
 }
 \description{
 This functions exports CPM values from a seurat object
+}
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+export_CPM_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 }

@@ -20,6 +20,14 @@ import_seurat_maelstrom(
 
 \item{return_df}{return both the seurat object and a dataframe with maelstrom scores as a list}
 }
+\value{
+seurat object with the maelstrom motif scores addes as an assay
+}
 \description{
 load Maelstrom enriched motifs
+}
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+maelstromfile_path <- system.file("extdata","maelstrom","final.out.txt",package = 'AnanseSeurat') 
+import_seurat_maelstrom(sce_small, maelstrom_file = maelstromfile_path)
 }

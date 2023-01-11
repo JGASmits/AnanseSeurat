@@ -26,6 +26,13 @@ DEGS_scANANSE(
 
 \item{additional_contrasts}{additional contrasts to add between clusters within cluster_ID}
 }
+\value{
+None, outputs DEG files in the output directory
+}
 \description{
 Calculate the differential genes needed for ananse influence
+}
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+DEGS_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 }
