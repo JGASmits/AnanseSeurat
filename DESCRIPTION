@@ -1,11 +1,18 @@
 Package: AnanseSeurat
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Title: Construct ANANSE GRN-Analysis Seurat
+Version: 1.1.0.0
+Authors@R: c(
+    person("Jos", "Smits", , "J.Smits@science.ru.nl", role = c("aut", "cre","cph"),
+           comment = c(ORCID = "0000-0001-5858-3905")),
+    person("Jo","Huiqing","Zhou", "Jo.Zhou@radboudumc.nl", role = c("aut","fnd","cph"),
+           comment = c(ORCID = "0000-0002-2434-3986"))
+  )
+Description: Enables gene regulatory network analysis on single cell clusters,
+    using 'ANANSE', Xu et al.(2021) <doi:https://doi.org/10.1093/nar/gkab598>
+    export data from 'Seurat' objects for GRN analysis using ANANSE snakemake,
+    and incorporates results for visualization and interpretation.
 License: MIT + file LICENSE
+BugReports: https://github.com/JGASmits/AnanseSeurat/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
@@ -23,5 +30,12 @@ Imports:
     utils
 Suggests: 
     covr,
+    knitr,
+    rmarkdown,
+    Signac,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+VignetteBuilder: knitr
+LazyData: true
+Depends: 
+    R (>= 2.10)

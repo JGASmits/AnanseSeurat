@@ -23,6 +23,13 @@ export_ATAC_scANANSE(
 
 \item{cluster_id}{ID used for finding clusters of cells}
 }
+\value{
+None, outputs ATAC peak count file in the output directory
+}
 \description{
 This functions exports ATAC values from a seurat object
+}
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+export_ATAC_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 }

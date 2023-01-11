@@ -8,7 +8,7 @@ Factor_Motif_Plot(
   seurat_object,
   TF_list,
   assay_RNA = "RNA",
-  assay_maelstrom = "TFanticor",
+  assay_maelstrom = "MotifTFanticor",
   logo_dir = "~/maelstrom/logos",
   col = c("darkred", "white", "darkgrey"),
   dim_reduction = "umap"
@@ -29,6 +29,17 @@ Factor_Motif_Plot(
 
 \item{dim_reduction}{dimensionality reduction method to use}
 }
+\value{
+patchwork plot containing a expression dimreduction plot, a maelstrom motif score dimreduction plot, and a png image of the motif
+}
 \description{
 plot both expression of a TF, and the motif accessibility of the associated motif. Finally, fetch the motif logo from the Maelstrom directory.
+}
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+logos_dir_path <- system.file("extdata","maelstrom","logos",package = 'AnanseSeurat') 
+sce_small <- Factor_Motif_Plot(sce_small, 
+  c('gene1', 'gene2'), 
+  dim_reduction = 'pca',
+  logo_dir = logos_dir_path)
 }
