@@ -29,6 +29,13 @@ export_ATAC_maelstrom(
 
 \item{n_top_rows}{amount of variable rows to export}
 }
+\value{
+None, outputs maelstrom peak counts table in the output directory
+}
 \description{
 normalize and export the peak table of a seurat object based on clusters
+}
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+config_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 }

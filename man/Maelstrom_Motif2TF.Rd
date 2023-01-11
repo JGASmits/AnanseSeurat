@@ -56,3 +56,8 @@ seurat object with two assays added, MotifTFcor for TFs with positive correlatio
 \description{
 create motif-factor links & export tables for printing motif score alongside its binding factor
 }
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+maelstrom_dir_path <- system.file("extdata","maelstrom",package = 'AnanseSeurat') 
+sce_small <- Maelstrom_Motif2TF(sce_small, maelstrom_dir = maelstrom_dir_path)
+}

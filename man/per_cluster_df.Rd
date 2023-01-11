@@ -23,3 +23,7 @@ dataframe with assay scores, concatinating cells from each per cluster
 \description{
 generate a table of the assay score averages per cluster identifier cell
 }
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+per_cluster_df(sce_small)
+}

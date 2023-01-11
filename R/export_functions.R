@@ -7,6 +7,9 @@
 #' @param RNA_count_assay assay of the seurat object containing the RNA count data
 #' @param cluster_id ID used for finding clusters of cells
 #' @return None, outputs CPM and count files in the output directory
+#' @examples 
+#' sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+#' export_CPM_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 export_CPM_scANANSE <- function(seurat_object,
                                 min_cells = 50,
@@ -85,6 +88,9 @@ export_CPM_scANANSE <- function(seurat_object,
 #' @param ATAC_peak_assay assay of the seurat object containing the peaks and peakcounts
 #' @param cluster_id ID used for finding clusters of cells
 #' @return None, outputs ATAC peak count file in the output directory
+#' @examples 
+#' sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+#' export_ATAC_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 export_ATAC_scANANSE <- function(seurat_object,
                                  min_cells = 50,
@@ -143,6 +149,9 @@ export_ATAC_scANANSE <- function(seurat_object,
 #' @param cluster_id ID used for finding clusters of cells
 #' @param additional_contrasts additional contrasts to add between clusters within cluster_ID
 #' @return None, outputs snakemake config file in the output directory
+#' @examples 
+#' sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+#' config_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 config_scANANSE <- function(seurat_object,
                             min_cells = 50,
@@ -224,6 +233,9 @@ config_scANANSE <- function(seurat_object,
 #' @param select_top_rows only output the top variable rows, or all rows if false
 #' @param n_top_rows amount of variable rows to export
 #' @return None, outputs maelstrom peak counts table in the output directory
+#' @examples 
+#' sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+#' config_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 export_ATAC_maelstrom <- function(seurat_object,
                                   min_cells = 50,
