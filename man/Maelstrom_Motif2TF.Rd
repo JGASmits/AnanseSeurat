@@ -50,6 +50,9 @@ Maelstrom_Motif2TF(
 
 \item{return_df}{return both the seurat object and two dataframes with maelstrom scores and expression values as a list}
 }
+\value{
+seurat object with two assays added, MotifTFcor for TFs with positive correlation to the linked motif, and MotifTFanticor for TFs with positive correlation to the linked motif
+}
 \description{
 create motif-factor links & export tables for printing motif score alongside its binding factor
 }

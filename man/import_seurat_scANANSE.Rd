@@ -26,7 +26,3 @@ seurat object with the influence scores addes as an assay
 \description{
 import the influences from a anansnake directory into a seurat object
 }
-\examples{
-sce <- import_seurat_scANANSE(sce, anansnake_inf_dir = './analysis/influence/')
-sce <- import_seurat_scANANSE(sce, cluster_id = 'cluster', anansnake_inf_dir = './analysis/influence/')
-}

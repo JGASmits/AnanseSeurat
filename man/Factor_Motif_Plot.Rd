@@ -29,6 +29,9 @@ Factor_Motif_Plot(
 
 \item{dim_reduction}{dimensionality reduction method to use}
 }
+\value{
+patchwork plot containing a expression dimreduction plot, a maelstrom motif score dimreduction plot, and a png image of the motif
+}
 \description{
 plot both expression of a TF, and the motif accessibility of the associated motif. Finally, fetch the motif logo from the Maelstrom directory.
 }

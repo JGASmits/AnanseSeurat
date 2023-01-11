@@ -7,6 +7,7 @@
 #' @param cluster_id ID used for finding clusters of cells
 #' @param RNA_count_assay assay containing the RNA data
 #' @param additional_contrasts additional contrasts to add between clusters within cluster_ID
+#' @return None, outputs DEG files in the output directory
 #' @export
 DEGS_scANANSE <- function(seurat_object,
                           min_cells = 50,

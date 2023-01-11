@@ -6,7 +6,7 @@
 #' @param output_dir directory where the files are outputted
 #' @param RNA_count_assay assay of the seurat object containing the RNA count data
 #' @param cluster_id ID used for finding clusters of cells
-#' @return CPM and count files
+#' @return None, outputs CPM and count files in the output directory
 #' @export
 export_CPM_scANANSE <- function(seurat_object,
                                 min_cells = 50,
@@ -84,6 +84,7 @@ export_CPM_scANANSE <- function(seurat_object,
 #' @param output_dir directory where the files are outputted
 #' @param ATAC_peak_assay assay of the seurat object containing the peaks and peakcounts
 #' @param cluster_id ID used for finding clusters of cells
+#' @return None, outputs ATAC peak count file in the output directory
 #' @export
 export_ATAC_scANANSE <- function(seurat_object,
                                  min_cells = 50,
@@ -141,6 +142,7 @@ export_ATAC_scANANSE <- function(seurat_object,
 #' @param genome genomepy name or location of the genome fastq file
 #' @param cluster_id ID used for finding clusters of cells
 #' @param additional_contrasts additional contrasts to add between clusters within cluster_ID
+#' @return None, outputs snakemake config file in the output directory
 #' @export
 config_scANANSE <- function(seurat_object,
                             min_cells = 50,
@@ -221,6 +223,7 @@ config_scANANSE <- function(seurat_object,
 #' @param cluster_id ID used for finding clusters of cells
 #' @param select_top_rows only output the top variable rows, or all rows if false
 #' @param n_top_rows amount of variable rows to export
+#' @return None, outputs maelstrom peak counts table in the output directory
 #' @export
 export_ATAC_maelstrom <- function(seurat_object,
                                   min_cells = 50,

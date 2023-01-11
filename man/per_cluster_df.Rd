@@ -23,8 +23,3 @@ dataframe with assay scores, concatinating cells from each per cluster
 \description{
 generate a table of the assay score averages per cluster identifier cell
 }
-\examples{
-per_cluster_df(sce)
-per_cluster_df(sce, assay = 'maelstrom', cluster_id = 'cluster')
-per_cluster_df(sce, assay = ''MotifTFanticor'', cluster_id = 'cluster')
-}

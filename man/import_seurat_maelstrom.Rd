@@ -26,7 +26,3 @@ seurat object with the maelstrom motif scores addes as an assay
 \description{
 load Maelstrom enriched motifs
 }
-\examples{
-sce <- import_seurat_maelstrom(sce, maelstrom_file  = './analysis/maelstrom/final.out.txt')
-sce <- import_seurat_maelstrom(sce, cluster_id = 'cluster', maelstrom_file = './analysis/maelstrom/final.out.txt')
-}
