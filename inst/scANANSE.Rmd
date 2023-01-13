@@ -162,9 +162,9 @@ pbmc$predicted.id <- str_replace(pbmc$predicted.id, '_', '-')
 
 
 ```{r}
-rds_file <- './scANANSE/preprocessed_PDMC.Rds'
+rds_file <- './scANANSE/preprocessed_PBMC.Rds'
 if(file.exists(rds_file)){
-  pdmc <- readRDS(rds_file)
+  pbmc <- readRDS(rds_file)
 }else{saveRDS(pbmc, file = rds_file)}
 
 pdf('./scANANSE/umap.pdf',width=7,height=3.5,paper='special') 
@@ -179,7 +179,7 @@ table(pbmc@meta.data$predicted.id)
 #source('/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/markdown_notebooks/R_functions/ANANSE_seurat_wrapper_V2.R')
 #Load pre-processed seurat object RDS file
 source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
-rds_file <- './scANANSE/preprocessed_PDMC.Rds'
+rds_file <- './scANANSE/preprocessed_PBMC.Rds'
 pbmc <- readRDS(rds_file)
 
 export_CPM_scANANSE(pbmc,
@@ -220,7 +220,7 @@ Lets load the results from Anansnake
 ```{r}
 source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
 
-rds_file <- './scANANSE/preprocessed_PDMC.Rds'
+rds_file <- './scANANSE/preprocessed_PBMC.Rds'
 pbmc <- readRDS(rds_file)
 cluster_id = 'predicted.id'
 
@@ -350,7 +350,7 @@ dev.off()
 
 import motif enrichment:
 ```{r}
-rds_file <- './scANANSE/preprocessed_PDMC.Rds'
+rds_file <- './scANANSE/preprocessed_PBMC.Rds'
 pbmc <- readRDS(rds_file)
 #is.null(pbmc@assays[['test']])
 getwd()
