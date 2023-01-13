@@ -11,6 +11,7 @@ dependencies:
   - r-spatstat 
   - bioconductor-ensdb.hsapiens.v86 == 2.99.0
   - bioconductor-bsgenome.hsapiens.ucsc.hg38 == 1.4.4
+  - bioconductor-complexheatmap
   - r-hdf5r 
   - bioconductor-biovizbase
   - macs2 

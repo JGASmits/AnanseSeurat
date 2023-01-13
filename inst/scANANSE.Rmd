@@ -10,11 +10,7 @@ output:
 # }
 # Sys.unsetenv("GITHUB_PAT")
 # remotes::install_github("mojaveazure/seurat-disk", upgrade = "never")#update none
-# remotes::install_github("JGASmits/AnanseSeuratWrapper")
-# install.packages("BiocManager")
-# BiocManager::install("ComplexHeatmap", update = F)
-# BiocManager::install("dendextend", update = F)
-
+# remotes::install_github("JGASmits/AnanseSeurat")
 
 library(Signac)
 library(Seurat)
@@ -22,7 +18,7 @@ library(EnsDb.Hsapiens.v86)
 library(BSgenome.Hsapiens.UCSC.hg38)
 library(SeuratDisk)
 library(stringr)
-#library(AnanseSeuratWrapper)
+library(AnanseSeurat)
 library(ComplexHeatmap)
 library(circlize)
 set.seed(1234)
