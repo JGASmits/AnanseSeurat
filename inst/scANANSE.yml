@@ -9,11 +9,12 @@ dependencies:
   - r-signac == 1.7.0
   - r-seurat == 4.1.1
   - r-spatstat 
+  - r-hdf5r 
   - bioconductor-ensdb.hsapiens.v86 == 2.99.0
   - bioconductor-bsgenome.hsapiens.ucsc.hg38 == 1.4.4
   - bioconductor-complexheatmap
-  - r-hdf5r 
   - bioconductor-biovizbase
+  - bioconductor-limma
   - macs2 
   - numpy 
 

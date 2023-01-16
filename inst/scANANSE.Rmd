@@ -16,18 +16,19 @@ library(Signac)
 library(Seurat)
 library(EnsDb.Hsapiens.v86)
 library(BSgenome.Hsapiens.UCSC.hg38)
-library(SeuratDisk)
-library(stringr)
-library(AnanseSeurat)
 library(ComplexHeatmap)
 library(circlize)
+library(stringr)
+
+library(SeuratDisk)
+library(AnanseSeurat)
+
 set.seed(1234)
-knitr::opts_knit$set(root.dir = normalizePath("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/"))
+knitr::opts_knit$set(root.dir = normalizePath("input your working dir containing the scANANSE folder"))
 ```
 
 ```{r}
 # load the RNA and ATAC data
-#counts <- Read10X_h5('/scratch/jsmits/scANANSE/data/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5')
 counts <- Read10X_h5('./scANANSE/data/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5')
 fragpath <- "./scANANSE/data/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz"
 # get gene annotations for hg38
@@ -172,7 +173,6 @@ table(pbmc@meta.data$predicted.id)
 
 
 ```{r}
-#source('/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/markdown_notebooks/R_functions/ANANSE_seurat_wrapper_V2.R')
 #Load pre-processed seurat object RDS file
 source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
 rds_file <- './scANANSE/preprocessed_PBMC.Rds'
@@ -214,13 +214,10 @@ DEGS_scANANSE(pbmc,
 ## Run Anansnake before processing
 Lets load the results from Anansnake
 ```{r}
-source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
-
 rds_file <- './scANANSE/preprocessed_PBMC.Rds'
 pbmc <- readRDS(rds_file)
 cluster_id = 'predicted.id'
 
-setwd("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/")
 pbmc <- import_seurat_scANANSE(pbmc,
                                cluster_id = 'predicted.id',
                                anansnake_inf_dir= "./scANANSE/analysis/influence/")
@@ -319,14 +316,11 @@ dev.off()
 
 Lets vizualise the influence results of a specific contrast:
 ```{r}
-library(ggplot2)
 MemoryInfluence <- read.table('./scANANSE/analysis/influence/anansesnake_B-memory_B-naive.tsv', header = T)
 NaiveInfluence <- read.table('./scANANSE/analysis/influence/anansesnake_B-naive_B-memory.tsv', header = T)
 
 NaiveInfluence$factor_fc <- NaiveInfluence$factor_fc* -1
 B_comparison <- rbind(NaiveInfluence,MemoryInfluence)
-
-
 
 B_comparison_plot <- ggplot(B_comparison, aes(factor_fc,influence_score)) + 
   geom_point(aes(size = direct_targets, colour = influence_score)) +
@@ -339,19 +333,11 @@ dev.off()
 
 ```
 
-```{r}
-2^-8
-```
-
-
 import motif enrichment:
 ```{r}
 rds_file <- './scANANSE/preprocessed_PBMC.Rds'
 pbmc <- readRDS(rds_file)
-#is.null(pbmc@assays[['test']])
-getwd()
 
-source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
 pbmc <- import_seurat_maelstrom(pbmc,
               cluster_id = 'predicted.id',
               maelstrom_dir = './scANANSE/analysis/maelstrom/')
@@ -363,7 +349,6 @@ head(motif_scores)
 ```
 
 ```{r}
-source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
 pbmc <- Maelstrom_Motif2TF(pbmc,
                          cluster_id = 'predicted.id',
                          maelstrom_dir = './scANANSE/analysis/maelstrom',
@@ -405,118 +390,17 @@ for (regtype in c('TFcor','TFanticor')){
 dev.off()
 ```
 ```{r}
-
-test <-  c('darkred','white','grey')
-test[1]
-
-source("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeurat/R/ANANSE_seurat_wrapper.R")
-
 TF_list <- c('PAX5','STAT6','ETS1','GATA3','MAX')
 pdf('./scANANSE/analysis/Factor_Motif_TFanticor.pdf',width=8,height=8,paper='special') 
-Factor_Motif_Plot2(pbmc, TF_list, assay_maelstrom = 'TFanticor', logo_dir = './scANANSE/analysis/maelstrom/logos/',col = c('darkred','white','grey'))
+Factor_Motif_Plot(pbmc, TF_list, assay_maelstrom = 'TFanticor', logo_dir = './scANANSE/analysis/maelstrom/logos/',col = c('darkred','white','grey'))
 dev.off()
 
 TF_list <- c('MEF2C','TCF7','ETS1','GATA3','MAX')
 pdf('./scANANSE/analysis/Factor_Motif_TFcor.pdf',width=8,height=8,paper='special') 
-Factor_Motif_Plot2(pbmc, TF_list, assay_maelstrom = 'TFcor', logo_dir = './scANANSE/analysis/maelstrom/logos/', col = c('grey','white','darkgreen'))
+Factor_Motif_Plot(pbmc, TF_list, assay_maelstrom = 'TFcor', logo_dir = './scANANSE/analysis/maelstrom/logos/', col = c('grey','white','darkgreen'))
 dev.off()
 
 ```
-
-
-```{r}
-Factor_Motif_Plot <- function(suerat_object,
-                                TF_list,
-                                assay_RNA = 'RNA',
-                                assay_maelstrom = 'TFanticor',
-                                logo_dir = '~/maelstrom/logos',
-                                col = c('darkred','darkgrey')){
-  DefaultAssay(object = suerat_object) <- assay_RNA
-  plot_assay1 <- Seurat::FeaturePlot(suerat_object, features = TF_list, ncol = 1, reduction = "umap")
-  DefaultAssay(object = suerat_object) <- assay_maelstrom
-  plot_Maelstrom_raw <- FeaturePlot(suerat_object,ncol = 1, features = TF_list, cols = col, combine = F)
-
-  #replace the TF name with the motif name for the maelstrom enrichment score
-  plot_Maelstrom <- lapply(plot_Maelstrom_raw, function(x){
-    TF_name <- names(x$data)[4][[1]]
-    motif_name <- TF_motif_table[TF_name,]$Motif
-    x + ggplot2::labs(title = motif_name)
-    })
-  plot_Maelstrom <- patchwork::wrap_plots(plot_Maelstrom, ncol = 1)
-  plot_logo <- lapply(plot_Maelstrom_raw, function(x){
-    TF_name <- names(x$data)[4][[1]]
-    motif_name <- TF_motif_table[TF_name,]$Motif
-    motif_name <- gsub('\\.','_',motif_name)
-    motif_path <- paste0(logo_dir,motif_name,'.png')
-    logo_image <- png::readPNG(motif_path)
-    ggplot2::ggplot() + ggpubr::background_image(logo_image) #+ ggplot2::coord_fixed()
-    })
-  plot_logo <- patchwork::wrap_plots(plot_logo, ncol = 1)
-  return(plot_expression1|plot_Maelstrom|plot_logo)
-}
-```
-
-```{r}
-
-
-
-highlight_TF1 <- c('PAX5','STAT6','ETS1','LMO2')
-TF_motif_table <- pbmc@assays[["TFanticor"]][[]]
-highlight_TF1 <- highlight_TF1[highlight_TF1 %in% rownames(TF_motif_table)]
-
-DefaultAssay(object = pbmc) <- "RNA"
-plot_expression1 <- FeaturePlot(pbmc, features = highlight_TF1, ncol = 1, reduction = "umap")
-DefaultAssay(object = pbmc) <- "TFanticor"
-logo_dir <- './scANANSE/analysis/maelstrom/logos/'
-plot_Maelstrom_raw <- FeaturePlot(pbmc,ncol = 1, features = highlight_TF1, cols = c("darkred","darkgrey"), combine = F)
-
-#replace the TF name with the motif name for the maelstrom enrichment score
-plot_Maelstrom <- lapply(plot_Maelstrom_raw, function(x){
-  TF_name <- names(x$data)[4][[1]]
-  motif_name <- TF_motif_table[TF_name,]$Motif
-  x + ggplot2::labs(title = motif_name)
-  })
-plot_Maelstrom <- patchwork::wrap_plots(plot_Maelstrom, ncol = 1)
-plot_logo <- lapply(plot_Maelstrom_raw, function(x){
-  TF_name <- names(x$data)[4][[1]]
-  motif_name <- TF_motif_table[TF_name,]$Motif
-  motif_name <- gsub('\\.','_',motif_name)
-  motif_path <- paste0(logo_dir,motif_name,'.png')
-  logo_image <- png::readPNG(motif_path)
-  ggplot2::ggplot() + ggpubr::background_image(logo_image) #+ ggplot2::coord_fixed()
-  })
-plot_logo <- patchwork::wrap_plots(plot_logo, ncol = 1)
-
-pdf('./scANANSE/analysis/repressive_motifs.pdf' ,width=10,height=10,paper='special') 
-print(plot_expression1|plot_Maelstrom|plot_logo)
-dev.off()
-```
-
-```{r}
-logo_dir <- './scANANSE/analysis/maelstrom/logos/'
-
-plot_expression1 <- FeaturePlot(pbmc, features = highlight_TF1, ncol = 1, reduction = 'umap')
-plot_Maelstrom_raw <- FeaturePlot(test,ncol = 1, features = highlight_TF1, cols = c("darkred","darkgrey"), combine = F)
-#replace the TF name with the motif name for the maelstrom enrichment score
-plot_Maelstrom <- lapply(plot_Maelstrom_raw, function(x){
-  TF_name <- names(x$data)[4][[1]]
-  motif_name <- TF_motif_table[TF_name,]$Motif
-  x + ggplot2::labs(title = motif_name)
-  })
-plot_Maelstrom <- patchwork::wrap_plots(plot_Maelstrom, ncol = 1)
-plot_logo <- lapply(plot_Maelstrom_raw, function(x){
-  TF_name <- names(x$data)[4][[1]]
-  motif_name <- TF_motif_table[TF_name,]$Motif
-  motif_name <- gsub('\\.','_',motif_name)
-  motif_path <- paste0(logo_dir,motif_name,'.png')
-  logo_image <- png::readPNG(motif_path)
-  return(ggplot2::ggplot() + ggpubr::background_image(logo_image) + ggplot2::coord_fixed())
-  })
-plot_logo <- patchwork::wrap_plots(plot_logo, ncol = 1)
-
-print(plot_expression1|plot_Maelstrom|plot_logo)
-```
-
 
 
 
