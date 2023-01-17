@@ -10,7 +10,7 @@ export_ATAC_maelstrom(
   output_dir = "~/",
   ATAC_peak_assay = "peaks",
   cluster_id = "seurat_clusters",
-  select_top_rows = T,
+  select_top_rows = TRUE,
   n_top_rows = 1e+05
 )
 }

@@ -37,9 +37,9 @@ plot both expression of a TF, and the motif accessibility of the associated moti
 }
 \examples{
 sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
-logos_dir_path <- system.file("extdata","maelstrom","logos",package = 'AnanseSeurat') 
-sce_small <- Factor_Motif_Plot(sce_small, 
-  c('gene1', 'gene2'), 
+logos_dir_path <- system.file("extdata","maelstrom","logos",package = 'AnanseSeurat')
+sce_small <- Factor_Motif_Plot(sce_small,
+  c('gene1', 'gene2'),
   dim_reduction = 'pca',
   logo_dir = logos_dir_path)
 }

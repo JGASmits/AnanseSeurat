@@ -58,6 +58,6 @@ create motif-factor links & export tables for printing motif score alongside its
 }
 \examples{
 sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
-maelstrom_dir_path <- system.file("extdata","maelstrom",package = 'AnanseSeurat') 
+maelstrom_dir_path <- system.file("extdata","maelstrom",package = 'AnanseSeurat')
 sce_small <- Maelstrom_Motif2TF(sce_small, maelstrom_dir = maelstrom_dir_path)
 }

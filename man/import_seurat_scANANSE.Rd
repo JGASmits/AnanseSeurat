@@ -8,7 +8,7 @@ import_seurat_scANANSE(
   seurat_object,
   cluster_id = "seurat_clusters",
   anansnake_inf_dir = "None",
-  return_df = F
+  return_df = FALSE
 )
 }
 \arguments{
@@ -28,6 +28,6 @@ import the influences from a anansnake directory into a seurat object
 }
 \examples{
 sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
-infdir <- system.file("extdata","influence",package = 'AnanseSeurat') 
+infdir <- system.file("extdata","influence",package = 'AnanseSeurat')
 import_seurat_scANANSE(sce_small, anansnake_inf_dir = infdir)
 }

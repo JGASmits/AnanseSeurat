@@ -24,7 +24,8 @@ DEGS_scANANSE(
 
 \item{RNA_count_assay}{assay containing the RNA data}
 
-\item{additional_contrasts}{additional contrasts to add between clusters within cluster_ID}
+\item{additional_contrasts}{additional contrasts to add
+between clusters within cluster_ID}
 }
 \value{
 None, outputs DEG files in the output directory

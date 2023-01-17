@@ -8,7 +8,7 @@ import_seurat_maelstrom(
   seurat_object,
   cluster_id = "seurat_clusters",
   maelstrom_file = "~/final.out.txt",
-  return_df = F
+  return_df = FALSE
 )
 }
 \arguments{
@@ -28,6 +28,6 @@ load Maelstrom enriched motifs
 }
 \examples{
 sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
-maelstromfile_path <- system.file("extdata","maelstrom","final.out.txt",package = 'AnanseSeurat') 
+maelstromfile_path <- system.file("extdata","maelstrom","final.out.txt",package = 'AnanseSeurat')
 import_seurat_maelstrom(sce_small, maelstrom_file = maelstromfile_path)
 }
