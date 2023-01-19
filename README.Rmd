@@ -1,45 +1,48 @@
+---
+output: github_document
+---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/",
+  out.width = "100%"
+)
+```
 # `AnanseSeurat` package <img src='man/figures/logo.png' align="right" height="139" />
 
 <!-- badges: start -->
-
 [![R-CMD-check](https://github.com/JGASmits/AnanseSeuratWrapper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JGASmits/AnanseSeuratWrapper/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/github/JGASmits/AnanseSeurat/branch/main/graph/badge.svg?token=0XKWAD0KJ7)](https://codecov.io/github/JGASmits/AnanseSeurat)
 <!-- badges: end -->
 
-The `AnanseSeurat` package takes pre-processed clustered single cell
-objects of scRNAseq and scATACseq or a multiome combination, and
-generates files for gene regulatory network (GRN) analysis. For the
-vignette see:
-<http://htmlpreview.github.io/?https://github.com/JGASmits/AnanseSeurat/blob/main/inst/introduction.html>
-The goal of overviewR is to make it easy to get an overview of a data
-set by displaying relevant sample information. At the moment, there are
-the following functions:
+
+The `AnanseSeurat` package takes pre-processed clustered single cell objects of scRNAseq and scATACseq or a multiome combination, and generates files for gene regulatory network (GRN) analysis.
+For the vignette see: http://htmlpreview.github.io/?https://github.com/JGASmits/AnanseSeurat/blob/main/inst/introduction.html
+The goal of overviewR is to make it easy to get an overview of a data set by displaying relevant sample information. At the moment, there are the following functions:
+
 
 ## Installation
 
-`AnanseSeurat` can be installed
-
-``` r
+ `AnanseSeurat` can be installed  
+```{r, eval=FALSE}
 library(devtools) # Tools to Make Developing R Packages Easier # Tools to Make Developing R Packages Easier
 Sys.unsetenv("GITHUB_PAT")
 remotes::install_github("JGASmits/AnanseSeurat@main")
 ```
 
 ### Usage
-
-``` r
+```{r eval=FALSE}
 library("AnanseSeurat")
 rds_file <- './scANANSE/preprocessed_PDMC.Rds'
 pbmc <- readRDS(rds_file)
 ```
 
-Next you can output the data from your single cell object, the file
-format, config file and sample file are all ready to automate GRN
-analysis using `anansnake`.
-<https://github.com/vanheeringen-lab/anansnake>
+Next you can output the data from your single cell object, the file format, config file and sample file are all ready to automate  GRN analysis using `anansnake`.
+https://github.com/vanheeringen-lab/anansnake
 
-``` r
+```{r, eval=FALSE}
 export_CPM_scANANSE(
   pbmc,
   min_cells <- 25,
@@ -79,25 +82,23 @@ DEGS_scANANSE(
 )
 ```
 
-### install and run anansnake
 
-Follow the instructions its respective github page,
-<https://github.com/vanheeringen-lab/anansnake> After activating the
-conda environment, use the generated files to run GRN analysis using
-your single cell cluster data:
+### install and run anansnake 
 
-``` bash
+Follow the instructions its respective github page, https://github.com/vanheeringen-lab/anansnake
+After activating the conda environment, use the generated files to run GRN analysis using your single cell cluster data:
+
+```{bash eval=FALSE}
 anansnake \
 --configfile scANANSE/analysis/config.yaml \
 --resources mem_mb=48_000 --cores 12
 ```
 
+
+
 ### import ANANSE results back to your single cell object
-
-After runing Anansnake, you can import the TF influence scores back into
-your single cell object of chooiche
-
-``` r
+After runing Anansnake, you can import the TF influence scores back into your single cell object of chooiche
+```{r eval=FALSE}
 ananse_result_list <- import_seurat_scANANSE(pbmc,
                         cluster_id = 'predicted.id',
                         anansnake_inf_dir= "./scANANSE/analysis/influence")
@@ -106,15 +107,13 @@ pbmc <- ananse_result_list[1]
 TF_influence_scores <- ananse_result_list[2]
 ```
 
+
 ### Thanks to:
 
-- Julian Arts and his Pycharm equivalent of this package
-  <https://github.com/Arts-of-coding/AnanseScanpy>
-- Siebren Frohlich and his anansnake implementation
-  <https://github.com/vanheeringen-lab/anansnake>
-- Branco Heuts for testing
+* Julian Arts and his Pycharm equivalent of this package https://github.com/Arts-of-coding/AnanseScanpy 
+* Siebren Frohlich and his anansnake implementation https://github.com/vanheeringen-lab/anansnake
+* Branco Heuts for testing
 
 # Credits
+The hex sticker is generated using the [```hexSticker```](https://github.com/GuangchuangYu/hexSticker) package.
 
-The hex sticker is generated using the
-[`hexSticker`](https://github.com/GuangchuangYu/hexSticker) package.
