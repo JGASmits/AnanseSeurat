@@ -105,10 +105,12 @@ TF_influence_scores <- ananse_result_list[2]
 
 ### Thanks to:
 
-- Julian Arts and his Pycharm equivalent of this package
+- Julian A. Arts and his Pycharm equivalent of this package
   <https://github.com/Arts-of-coding/AnanseScanpy>
 - Siebren Frohlich and his anansnake implementation
   <https://github.com/vanheeringen-lab/anansnake>
+- Rebecca R. Snabel for her implementation of the motif expression
+  correlation analysis
 - Branco Heuts for testing
 
 # Credits
