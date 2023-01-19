@@ -9,9 +9,7 @@
 
 The `AnanseSeurat` package takes pre-processed clustered single cell
 objects of scRNAseq and scATACseq or a multiome combination, and
-generates files for gene regulatory network (GRN) analysis. For the
-vignette see:
-<http://htmlpreview.github.io/?https://github.com/JGASmits/AnanseSeurat/blob/main/inst/introduction.html>
+generates files for gene regulatory network (GRN) analysis.
 
 ## Installation
 
@@ -95,12 +93,12 @@ After runing Anansnake, you can import the TF influence scores back into
 your single cell object of chooiche
 
 ``` r
-ananse_result_list <- import_seurat_scANANSE(pbmc,
-                        cluster_id = 'predicted.id',
-                        anansnake_inf_dir= "./scANANSE/analysis/influence")
-
-pbmc <- ananse_result_list[1]
-TF_influence_scores <- ananse_result_list[2]
+pbmc <- import_seurat_scANANSE(pbmc,
+                               cluster_id = 'predicted.id',
+                               anansnake_inf_dir = "./scANANSE/analysis/influence")
+TF_influence <- per_cluster_df(pbmc,
+                               cluster_id = 'predicted.id',
+                               assay = 'influence')
 ```
 
 ### Thanks to:
