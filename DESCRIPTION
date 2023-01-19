@@ -1,6 +1,6 @@
 Package: AnanseSeurat
 Title: Construct ANANSE GRN-Analysis Seurat
-Version: 1.1.0.0
+Version: 1.1.0
 Authors@R: c(
     person(given = "Jos", family ="Smits",middle = NULL, email = "Jsmits@science.ru.nl", role = c("aut", "cre","cph"),
            comment = c(ORCID = "0000-0001-5858-3905")),
@@ -37,6 +37,5 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-LazyData: true
 Depends: 
-    R (>= 2.10)
+    R (>= 3.50)
