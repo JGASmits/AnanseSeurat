@@ -12,9 +12,6 @@ objects of scRNAseq and scATACseq or a multiome combination, and
 generates files for gene regulatory network (GRN) analysis. For the
 vignette see:
 <http://htmlpreview.github.io/?https://github.com/JGASmits/AnanseSeurat/blob/main/inst/introduction.html>
-The goal of overviewR is to make it easy to get an overview of a data
-set by displaying relevant sample information. At the moment, there are
-the following functions:
 
 ## Installation
 
@@ -42,7 +39,7 @@ analysis using `anansnake`.
 ``` r
 export_CPM_scANANSE(
   pbmc,
-  min_cells <- 25,
+  min_cells = 25,
   output_dir = './scANANSE/analysis',
   cluster_id = 'predicted.id',
   RNA_count_assay = 'RNA'
@@ -50,7 +47,7 @@ export_CPM_scANANSE(
 
 export_ATAC_scANANSE(
   pbmc,
-  min_cells <- 25,
+  min_cells = 25,
   output_dir = './scANANSE/analysis',
   cluster_id = 'predicted.id',
   ATAC_peak_assay = 'peaks'
@@ -64,7 +61,7 @@ contrasts <-  c('B-naive_B-memory',
 
 config_scANANSE(
   pbmc,
-  min_cells <- 25,
+  min_cells = 25,
   output_dir = './scANANSE/analysis',
   cluster_id = 'predicted.id',
   additional_contrasts = contrasts
@@ -72,7 +69,7 @@ config_scANANSE(
 
 DEGS_scANANSE(
   pbmc,
-  min_cells <- 25,
+  min_cells = 25,
   output_dir = './scANANSE/analysis',
   cluster_id = 'predicted.id',
   additional_contrasts = contrasts
