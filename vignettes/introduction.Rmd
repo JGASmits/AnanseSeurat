@@ -11,29 +11,29 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE,
                       comment = "#>")
 knitr::opts_chunk$set(fig.width = 7, fig.height = 5)
-#knitr::opts_knit$set(root.dir = normalizePath("/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/AnanseSeuratTesting/"))
 ```
 
 #### **Load your single cell object(s)**
 
 AnanseSeurat requires a preprocessed single cell object. Before exporting data make sure the single cell object has been filtered for good quality cells, and has underwent sufficient pre-processing. For guides on pre-processing scRNA-seq and scATAC-seq there are some great vignettes and guides available. We will also set the working directory.
 
-```{r setup, eval = F}
+```{r setup, eval = T}
 # if (!requireNamespace("remotes", quietly = TRUE)) {
 #   install.packages("remotes")
 # }
 # Sys.unsetenv("GITHUB_PAT")
-# remotes::install_github("JGASmits/AnanseSeuratWrapper")
+# remotes::install_github("JGASmits/AnanseSeurat")
 
 library(AnanseSeurat)
-library(SeuratDisk)
 library(Seurat)
 library(Signac)
+
+knitr::opts_knit$set(root.dir = normalizePath('/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/scANANSE'))
 ```
 
 In this example we will use a preprocsed 10x PBMC multiome dataset (PBMC from a Healthy Donor (v1, 150x150) Single Cell Multiome ATAC + Gene Expression Dataset by Cell Ranger ARC 2.0.0). This data was pre-processed following the standard pre-processing from Signac. The pre-pocessed single cell object is available at Zenado: <https://zenodo.org/record/7446267/>
 
-```{r load_scObject, eval = F}
+```{r load_scObject, eval = T}
 rds_file <- 'preprocessed_PDMC.Rds'
 pbmc <- readRDS(rds_file)
 DimPlot(pbmc,
@@ -53,7 +53,7 @@ We will start with outputting the CPM file, for this we select:
 3.  the cluster ID containing the cluster names
 4.  the name of the Assay containing the RNA data.
 
-```{r export_CPMs, eval = F}
+```{r export_CPMs, eval = T}
 export_CPM_scANANSE(
   pbmc,
   min_cells <- 25,
@@ -70,7 +70,7 @@ Next we will output the ATAC peak matrix, , for this we select:
 3.  the cluster ID containing the cluster names
 4.  the name of the Assay containing the ATAC peak data.
 
-```{r, eval = F}
+```{r, eval = T}
 export_ATAC_scANANSE(
   pbmc,
   min_cells <- 25,
@@ -82,8 +82,7 @@ export_ATAC_scANANSE(
 
 Next we will generate the config and sample file needed for anansnake, we will also specify specific pairwise comparisons between clusters of interest. By default, scANANSE compares all clusters to a network based on the average values of all clusters. Additional comparisons can be specified, in this case, B-naive and B-memory cells were also specified to compare directly to each other.
 
-```{r, eval = F}
-#specify additional contrasts: 
+```{r, eval = T}
 contrasts <-  list('B-naive_B-memory',
                    'B-memory_B-naive',
                    'B-naive_CD16-Mono',
@@ -101,7 +100,7 @@ config_scANANSE(
 
 Finally we will calculate the markergenes for each cluster and between clusters of a specific comparison:
 
-```{r, eval = FALSE}
+```{r, eval = F}
 DEGS_scANANSE(
   pbmc,
   min_cells <- 25,
@@ -119,7 +118,7 @@ After this all your files are ready to run Anansnake for gene regulatory network
 
 After running anansnake the results can be incorporated back into your single cell object.
 
-```{r, eval = F}
+```{r, eval = T}
 pbmc <- import_seurat_scANANSE(pbmc,
                                cluster_id = 'predicted.id',
                                anansnake_inf_dir = "./analysis/influence/")
@@ -127,7 +126,7 @@ pbmc <- import_seurat_scANANSE(pbmc,
 
 The top TFs contributing to your clusters can be vizualized as a table:
 
-```{r, eval = F}
+```{r, eval = T}
 TF_influence <- per_cluster_df(pbmc,
                                assay = 'influence',
                                cluster_id = 'predicted.id')
@@ -137,7 +136,7 @@ head(TF_influence)
 
 We can also visualize the influence score of TFs in the single cell object:
 
-```{r, eval = F}
+```{r, eval = T}
 highlight_TF1 <- c('STAT4', 'MEF2C')
 
 DefaultAssay(object = pbmc) <- "RNA"

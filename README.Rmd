@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 # `AnanseSeurat` package <img src='man/figures/logo.png' align="right" height="139" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/JGASmits/AnanseSeuratWrapper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JGASmits/AnanseSeuratWrapper/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/JGASmits/AnanseSeurat/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JGASmits/AnanseSeurat/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/github/JGASmits/AnanseSeurat/branch/main/graph/badge.svg?token=0XKWAD0KJ7)](https://codecov.io/github/JGASmits/AnanseSeurat)
 <!-- badges: end -->
 
@@ -22,7 +22,7 @@ The `AnanseSeurat` package takes pre-processed clustered single cell objects of 
 
 ## Installation
 
- `AnanseSeurat` can be installed  
+ `AnanseSeurat` can be installed using
 ```{r, eval=FALSE}
 library(devtools) # Tools to Make Developing R Packages Easier # Tools to Make Developing R Packages Easier
 Sys.unsetenv("GITHUB_PAT")

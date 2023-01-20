@@ -3,7 +3,7 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/JGASmits/AnanseSeuratWrapper/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JGASmits/AnanseSeuratWrapper/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/JGASmits/AnanseSeurat/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JGASmits/AnanseSeurat/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/github/JGASmits/AnanseSeurat/branch/main/graph/badge.svg?token=0XKWAD0KJ7)](https://codecov.io/github/JGASmits/AnanseSeurat)
 <!-- badges: end -->
 
@@ -13,7 +13,7 @@ generates files for gene regulatory network (GRN) analysis.
 
 ## Installation
 
-`AnanseSeurat` can be installed
+`AnanseSeurat` can be installed using
 
 ``` r
 library(devtools) # Tools to Make Developing R Packages Easier # Tools to Make Developing R Packages Easier
