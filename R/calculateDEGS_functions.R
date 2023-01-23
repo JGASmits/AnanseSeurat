@@ -10,7 +10,7 @@
 #' between clusters within cluster_ID
 #' @return None, outputs DEG files in the output directory
 #' @examples
-#' sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+#' sce_small <- readRDS(system.file("extdata","sce_obj_tiny.Rds",package = 'AnanseSeurat'))
 #' DEGS_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 DEGS_scANANSE <- function(seurat_object,

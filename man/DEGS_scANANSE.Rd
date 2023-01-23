@@ -34,6 +34,6 @@ None, outputs DEG files in the output directory
 Calculate the differential genes needed for ananse influence
 }
 \examples{
-sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+sce_small <- readRDS(system.file("extdata","sce_obj_tiny.Rds",package = 'AnanseSeurat'))
 DEGS_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 }

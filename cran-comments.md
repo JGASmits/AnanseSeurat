@@ -3,7 +3,7 @@
 0 errors | 0 warnings | 2 note
 
 * 1 note about a new release.
-* 1 description note about about potential misspelt words (which are not misspelt), and the person elements containing middle names
+* 1 description note about about potential misspelt words (which are not misspelt)
 
 ##R-hub
 
