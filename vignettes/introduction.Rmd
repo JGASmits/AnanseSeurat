@@ -57,7 +57,7 @@ We will start with outputting the CPM file, for this we select:
 export_CPM_scANANSE(
   pbmc,
   min_cells <- 25,
-  output_dir = './analysis',
+  output_dir = paste0(tempdir(),'/analysis'),
   cluster_id = 'predicted.id',
   RNA_count_assay = 'RNA'
 )
@@ -74,7 +74,7 @@ Next we will output the ATAC peak matrix, , for this we select:
 export_ATAC_scANANSE(
   pbmc,
   min_cells <- 25,
-  output_dir = './analysis',
+  output_dir = paste0(tempdir(),'/analysis'),
   cluster_id = 'predicted.id',
   ATAC_peak_assay = 'peaks'
 )
@@ -91,7 +91,7 @@ contrasts <-  list('B-naive_B-memory',
 config_scANANSE(
   pbmc,
   min_cells <- 25,
-  output_dir = './analysis',
+  output_dir = paste0(tempdir(),'/analysis'),
   cluster_id = 'predicted.id',
   genome = './data/hg38',
   additional_contrasts = contrasts

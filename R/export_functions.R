@@ -18,7 +18,7 @@ export_CPM_scANANSE <- function(seurat_object,
                                 cluster_id = 'seurat_clusters') {
   dir.create(file.path(output_dir), showWarnings = FALSE)
   Seurat::Idents(seurat_object) <- cluster_id
-  print('calculating CPM')
+  message('calculating CPM')
   seurat_object <- Seurat::NormalizeData(
     seurat_object,
     assay  = RNA_count_assay,
@@ -34,7 +34,7 @@ export_CPM_scANANSE <- function(seurat_object,
     #only use ANANSE on clusters with more than 50 cells
     n_cells <- dim(seurat_object_cluster)[2]
     if (n_cells > min_cells) {
-      print(paste0('gather data from ', cluster, ' with ', n_cells, ' cells'))
+      message(paste0('gather data from ', cluster, ' with ', n_cells, ' cells'))
       cluster_names[i] <- cluster
       
       #lets grab the scRNAseq counts
@@ -54,7 +54,12 @@ export_CPM_scANANSE <- function(seurat_object,
       FPKM_count_lists[i] <- as.data.frame(mat_norm)
       i <- i + 1
     } else{
-      print(paste0(cluster, ' less than ', min_cells, ' skipping'))
+      warning(paste0(
+        cluster,
+        ' less than ',
+        min_cells,
+        ' not including this cluster'
+      ))
     }
   }
   
@@ -112,7 +117,7 @@ export_ATAC_scANANSE <- function(seurat_object,
     #only use ANANSE on clusters with more than 50 cells
     n_cells <- dim(seurat_object_cluster)[2]
     if (n_cells > min_cells) {
-      print(paste0('gather data from ', cluster, ' with ', n_cells, ' cells'))
+      message(paste0('gather data from ', cluster, ' with ', n_cells, ' cells'))
       cluster_names[i] <- cluster
       
       #lets grab the ATAC signal
@@ -122,7 +127,12 @@ export_ATAC_scANANSE <- function(seurat_object,
       peak_count_lists[i] <- as.data.frame(mat)
       i <- i + 1
     } else{
-      print(paste0(cluster, ' less than ', min_cells, ' skipping'))
+      warning(paste0(
+        cluster,
+        ' less than ',
+        min_cells,
+        ' not including this cluster'
+      ))
     }
   }
   
@@ -204,7 +214,7 @@ config_scANANSE <- function(seurat_object,
   contrast_list <-
     as.list(paste0('anansesnake_', cluster_names, '_average'))
   if (typeof(additional_contrasts) == 'list') {
-    print('adding additional contrasts')
+    message('adding additional contrasts')
     additional_contrasts <-
       paste0('anansesnake_', additional_contrasts)
     contrast_list <- c(contrast_list, additional_contrasts)
@@ -241,7 +251,6 @@ config_scANANSE <- function(seurat_object,
       file = paste0(output_dir, "/config.yaml"),
       append = TRUE
     )
-    print(contr)
   }
 }
 
@@ -277,7 +286,7 @@ export_ATAC_maelstrom <- function(seurat_object,
     #only use ANANSE on clusters with more than 50 cells
     n_cells <- dim(seurat_object_cluster)[2]
     if (n_cells > min_cells) {
-      print(paste0('gather data from ', cluster, ' with ', n_cells, ' cells'))
+      message(paste0('gather data from ', cluster, ' with ', n_cells, ' cells'))
       cluster_names[i] <- cluster
       #lets grab the ATAC signal
       mat <- seurat_object_cluster@assays[[ATAC_peak_assay]]@counts
@@ -286,7 +295,7 @@ export_ATAC_maelstrom <- function(seurat_object,
       peak_count_lists[i] <- as.data.frame(mat)
       i <- i + 1
     } else{
-      print(paste0(cluster, ' less than ', min_cells, ' skipping'))
+      message(paste0(cluster, ' less than ', min_cells, ' skipping'))
     }
   }
   
@@ -304,15 +313,14 @@ export_ATAC_maelstrom <- function(seurat_object,
   activity_matrix <- log2(activity_matrix + 1)
   activity_matrix <- scale(activity_matrix)
   activity_matrix <- as.data.frame(activity_matrix)
-  print(nrow(activity_matrix))
   if (select_top_rows) {
     if (nrow(activity_matrix) > n_top_rows) {
-      print(paste0(
+      message(paste0(
         'large dataframe detected, selecting top variable rows n = ',
         n_top_rows
       ))
-      print('if entire dataframe is required, add select_top_rows = False as a parameter')
-      print('or change ammount of rows via the n_top_rows parameter')
+      message('if entire dataframe is required, add select_top_rows = False as a parameter')
+      message('or change ammount of rows via the n_top_rows parameter')
       row_variance <- apply(activity_matrix, 1, stats::var)
       activity_matrix$RowVar <- row_variance
       activity_matrix <-

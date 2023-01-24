@@ -10,8 +10,7 @@ test_that("Maelstrom_Motif2TF works", {
       combine_motifs = method,
       expr_tresh = 2,
       cor_tresh = 0.01,
-      cor_method = "pearson",
-      output_dir = tempdir()
+      cor_method = "pearson"
     )
     expect_true(length(sce_returned@assays) == 6)
     expect_true("MotifTFcor" %in% names(sce_returned@assays))

@@ -29,5 +29,5 @@ load Maelstrom enriched motifs
 \examples{
 sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
 maelstromfile_path <- system.file("extdata","maelstrom","final.out.txt",package = 'AnanseSeurat')
-import_seurat_maelstrom(sce_small, maelstrom_file = maelstromfile_path)
+sce_small <- import_seurat_maelstrom(sce_small, maelstrom_file = maelstromfile_path)
 }

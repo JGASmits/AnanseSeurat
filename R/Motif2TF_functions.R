@@ -12,7 +12,6 @@
 #' @param cor_tresh minimum value of to filter the cor() output by
 #' @param cor_method specify one of the cor() methods
 #' @param curated_motifs use only curated motifs (T), or all motifs in the database (F)
-#' @param output_dir where to store the results
 #' @param combine_motifs means (take mean multiple motifscores), max_var (take motif with highest variance), or max_cor (take motif with best correlation to gene expression)
 #' @param return_df return both the seurat object and two dataframes with maelstrom scores and expression values as a list
 #' @return seurat object with two assays added, MotifTFcor for TFs with positive correlation to the linked motif, and MotifTFanticor for TFs with positive correlation to the linked motif
@@ -32,16 +31,15 @@ Maelstrom_Motif2TF <- function(seurat_object,
                                RNA_expression_slot = "data",
                                expr_tresh = 10,
                                cor_tresh = 0.30,
-                               curated_motifs = F,
+                               curated_motifs = FALSE,
                                cor_method = "pearson",
-                               output_dir = "./",
-                               return_df = F) {
+                               return_df = FALSE) {
   ## Check if m2f_df object provided or path to Maelstrom output.
   ## Check if m2f_df object provided contains the right columns.
   m2f_df_cols <- c("Motif", "Factor")
   if (is.null(m2f_df)) {
     if (is.null(maelstrom_dir)) {
-      print(
+      stop(
         "Provide path for maelstrom_dir or provide table m2f_df with Motif and Factor column."
       )
     } else {
@@ -57,7 +55,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
         )
     }
   } else if (!unique(m2f_df_cols %in% colnames(m2f_df))) {
-    print("Provide m2f_df with at least 2 columns with names Motif and Factor.")
+    stop("Provide m2f_df with at least 2 columns with names Motif and Factor.")
   }
   
   if ((combine_motifs != 'means') &
@@ -68,13 +66,13 @@ Maelstrom_Motif2TF <- function(seurat_object,
   }
   
   if (curated_motifs) {
-    print('using only curated motifs from database')
+    message('using only curated motifs from database')
     m2f_df <- m2f_df[m2f_df$Curated == 'Y', ]
   }
   
   ## Load needed objects
   if (is.null(mot_mat)) {
-    print(
+    message(
       paste0(
         'loading maelstrom values from maelstrom assay using the cluster identifier ',
         cluster_id
@@ -87,7 +85,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
   }
   
   ## Set up Seurat object
-  print("non-expressed genes are removed")
+  message("non-expressed genes are removed")
   Seurat::DefaultAssay(seurat_object) <- RNA_expression_assay
   genes_expressed <-
     rownames(seurat_object)[rowSums(as.matrix(seurat_object[[RNA_expression_assay]]@counts)) >= expr_tresh]
@@ -100,8 +98,8 @@ Maelstrom_Motif2TF <- function(seurat_object,
   ## Check if data is normalized
   if (identical(seurat_object[[RNA_expression_assay]]@data, seurat_object[[RNA_expression_assay]]@counts) &
       RNA_expression_slot == "data") {
-    print("Your data slot was not yet normalized.")
-    print(
+    message("Your data slot was not yet normalized.")
+    message(
       paste0(
         "Seurat NormalizeData with default settings will be run on all the genes in the ",
         RNA_expression_assay,
@@ -151,7 +149,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
   }
   
   ## Only keep motif-TF combinations with an absolute R higher than treshold
-  print(paste0("Only keep motif-TF combinations with an R > ", cor_tresh))
+  message(paste0("Only keep motif-TF combinations with an R > ", cor_tresh))
   m2f_df_match <-
     m2f_df_match[base::abs(m2f_df_match$cor) > cor_tresh, ]
   
@@ -162,20 +160,15 @@ Maelstrom_Motif2TF <- function(seurat_object,
         dplyr::arrange(dplyr::desc(base::abs(m2f_df_match$cor))) %>% dplyr::filter(dplyr::row_number() == 1)
     )
   
-  #print(paste0('total length m2f_df_unique ', length(m2f_df_unique$cor)))
   #Select only positive correlations or only negative correlations (repressors)
   for (typeTF in c('MotifTFcor', 'MotifTFanticor')) {
     m2f <- m2f_df_unique
     if (typeTF == 'MotifTFanticor') {
-      print("Selecting anticorrelating TFs")
-      #print(paste0('total m2f', length(m2f$cor)))
+      message("Selecting anticorrelating TFs")
       m2f <- m2f_df_unique[m2f_df_unique$cor < 0, ]
-      #print(paste0('total m2f', length(m2f$cor)))
     } else {
-      print("Selecting correlating TFs")
-      #print(paste0('total m2f', length(m2f$cor)))
+      message("Selecting correlating TFs")
       m2f <- m2f_df_unique[m2f_df_unique$cor > 0, ]
-      #print(paste0('total m2f', length(m2f$cor)))
     }
     
     m2f$associated_motifs <- NA
@@ -198,18 +191,17 @@ Maelstrom_Motif2TF <- function(seurat_object,
     ## Make motif score per TF (selecting most variable motif per TF or make mean of all motifs associated).
     if (combine_motifs == 'means') {
       rownames(mot_plot) <- m2f$Factor
-      print("Take mean motif score of all binding motifs per TF")
+      message("Take mean motif score of all binding motifs per TF")
       ## Take mean of motifs linked to the same TF
       mot_plot <-
         stats::aggregate(mot_plot, list(row.names(mot_plot)), mean)
-      print(mot_plot)
       mot_plot <-
         as.data.frame(mot_plot, row.names = mot_plot[, 1])[, -1]
       m2f <-
         as.data.frame(m2f[!duplicated(m2f$Factor), c("Factor", "associated_motifs"), drop = FALSE])
     }
     if (combine_motifs == 'max_cor') {
-      print("Motif best (absolute) correlated to expression is selected per TF")
+      message("Motif best (absolute) correlated to expression is selected per TF")
       ## Using m2f file for selecting highest correlating motif to factor:
       m2f <- m2f[order(base::abs(m2f[, "cor"]), decreasing = T)]
       m2f <-
@@ -219,7 +211,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
       rownames(mot_plot) <- m2f$Factor
     }
     if (combine_motifs == 'max_var') {
-      print("Most variable binding motif is selected per TF")
+      message("Most variable binding motif is selected per TF")
       ## Using m2f file for selecting highest variable motif to factor:
       m2f <- m2f[order(base::abs(m2f[, "var"]), decreasing = T)]
       m2f <- m2f[!duplicated(m2f$Factor), ]
@@ -234,10 +226,6 @@ Maelstrom_Motif2TF <- function(seurat_object,
     exp_plot_scale <- t(scale(t(exp_plot)))
     mot_plot_scale <- t(scale(t(mot_plot)))
     
-    #expression_file <- paste(output_dir, "expression_means_scaled.tsv", sep = '/')
-    #utils::write.table(exp_plot_scale, expression_file, sep = '\t', quote = F)
-    #motif_file <- paste(output_dir, "motif_intensities_scaled.tsv", sep = '/')
-    #utils::write.table(mot_plot_scale, motif_file, sep = '\t', quote = F)
     matrix_list <- list()
     matrix_list[["expression"]] <- exp_plot
     matrix_list[["motif_score"]] <- mot_plot

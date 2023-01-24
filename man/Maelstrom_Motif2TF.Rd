@@ -15,10 +15,9 @@ Maelstrom_Motif2TF(
   RNA_expression_slot = "data",
   expr_tresh = 10,
   cor_tresh = 0.3,
-  curated_motifs = F,
+  curated_motifs = FALSE,
   cor_method = "pearson",
-  output_dir = "./",
-  return_df = F
+  return_df = FALSE
 )
 }
 \arguments{
@@ -45,8 +44,6 @@ Maelstrom_Motif2TF(
 \item{curated_motifs}{use only curated motifs (T), or all motifs in the database (F)}
 
 \item{cor_method}{specify one of the cor() methods}
-
-\item{output_dir}{where to store the results}
 
 \item{return_df}{return both the seurat object and two dataframes with maelstrom scores and expression values as a list}
 }

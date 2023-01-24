@@ -9,7 +9,7 @@
 #' @examples
 #' sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
 #' infdir <- system.file("extdata","influence",package = 'AnanseSeurat')
-#' import_seurat_scANANSE(sce_small, anansnake_inf_dir = infdir)
+#' sce_small <- import_seurat_scANANSE(sce_small, anansnake_inf_dir = infdir)
 #' @export
 import_seurat_scANANSE <- function(seurat_object,
                                    cluster_id = 'seurat_clusters',
@@ -83,7 +83,7 @@ import_seurat_scANANSE <- function(seurat_object,
       cell_signal_list[[i]] <-
         TF_signal
     } else{
-      print(paste0(
+      warning(paste0(
         paste0('no cells of id ', cell_type),
         ' found in seurat object'
       ))
@@ -99,7 +99,7 @@ import_seurat_scANANSE <- function(seurat_object,
     cell_barcodes_all[!cell_barcodes_all %in% rownames(TF_array)]
   cell_barcodes_missing <- as.data.frame(cell_barcodes_missing)
   if (length(cell_barcodes_missing > 0)) {
-    print('adding cells with no influence scores with NA')
+    message('adding cells with no influence scores with NA')
     for (TF in colnames(TF_signal)) {
       cell_barcodes_missing[[TF]] <- NA
     }
@@ -132,7 +132,7 @@ import_seurat_scANANSE <- function(seurat_object,
 #' @examples
 #' sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
 #' maelstromfile_path <- system.file("extdata","maelstrom","final.out.txt",package = 'AnanseSeurat')
-#' import_seurat_maelstrom(sce_small, maelstrom_file = maelstromfile_path)
+#' sce_small <- import_seurat_maelstrom(sce_small, maelstrom_file = maelstromfile_path)
 #' @export
 import_seurat_maelstrom <- function(seurat_object,
                                     cluster_id = 'seurat_clusters',
@@ -166,7 +166,6 @@ import_seurat_maelstrom <- function(seurat_object,
   #get cell IDs from the single cell object
   for (cell_type in rownames(motif_df)) {
     #lets check if any cells with this annotation are present in the seurat object
-    print(cell_type)
     cells_in_seurat <- seurat_object[[cluster_id]] == cell_type
     if (TRUE %in% cells_in_seurat) {
       relevant_IDS <-
@@ -177,11 +176,10 @@ import_seurat_maelstrom <- function(seurat_object,
       TF_signal <-
         TF_signal[rep(seq_len(nrow(TF_signal)), each = nrow(relevant_IDS)),]
       rownames(TF_signal) <- rownames(as.data.frame(relevant_IDS))
-      #print(TF_signal)
       cell_signal_list[[i]] <-
         TF_signal
     } else{
-      print(paste0(
+      warning(paste0(
         paste0('no cells of id ', cell_type),
         ' found in seurat object'
       ))
@@ -189,7 +187,6 @@ import_seurat_maelstrom <- function(seurat_object,
     i <- i + 1
   }
   TF_array <- do.call("rbind", cell_signal_list)
-  #print(head(TF_array))
   #add cell IDs that do not have Maelstrom signal and give them a NA vallue
   cell_barcodes_all <-
     rownames(as.data.frame(Seurat::Idents(object = seurat_object)))
@@ -225,7 +222,7 @@ import_seurat_maelstrom <- function(seurat_object,
 #' @return dataframe with assay scores, concatinating cells from each per cluster
 #' @examples
 #' sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
-#' per_cluster_df(sce_small)
+#' df <- per_cluster_df(sce_small)
 #' @export
 per_cluster_df <- function(seurat_object,
                            assay = 'influence',
@@ -233,8 +230,7 @@ per_cluster_df <- function(seurat_object,
   Seurat::Idents(seurat_object) <- cluster_id
   #make a dataframe with the values per cluster:
   clusters <- unique(seurat_object[[cluster_id]])
-  #print(clusters)
-  
+
   #check if assay exists
   if (is.null(seurat_object@assays[[assay]])) {
     stop(paste0('assay ', assay, ' not found in the seurat object '))
@@ -249,7 +245,7 @@ per_cluster_df <- function(seurat_object,
     cluster_matrix <-
       as.data.frame(seurat_object_subset@assays[[assay]]@data)
     if (length(unique(as.list(cluster_matrix))) != 1) {
-      print(
+      warning(
         paste0(
           'not all cells of the cluster ',
           cluster,

@@ -6,7 +6,7 @@
 #' @param output_dir directory where the files are outputted
 #' @param cluster_id ID used for finding clusters of cells
 #' @param RNA_count_assay assay containing the RNA data
-#' @param additional_contrasts additional contrasts to add 
+#' @param additional_contrasts additional contrasts to add
 #' between clusters within cluster_ID
 #' @return None, outputs DEG files in the output directory
 #' @examples
@@ -29,7 +29,7 @@ DEGS_scANANSE <- function(seurat_object,
     n_cells <- dim(seurat_object_cluster)[2]
     if (n_cells > min_cells) {
       cluster_names[i] <- cluster
-      i <- i + 1 # Increase i to add clusters iteratively 
+      i <- i + 1 # Increase i to add clusters iteratively
     }
   }
   
@@ -37,14 +37,14 @@ DEGS_scANANSE <- function(seurat_object,
   contrast_list <-
     as.list(paste0('anansesnake_', cluster_names, '_average'))
   if (typeof(additional_contrasts) == 'list') {
-    print('adding additional contrasts')
+    message('adding additional contrasts')
     additional_contrasts <-
       paste0('anansesnake_', additional_contrasts)
     contrast_list <- c(contrast_list, additional_contrasts)
   }
   
   for (contr in contrast_list) {
-    print(paste0('calculating DEGS for contrast ', contr))
+    message(paste0('calculating DEGS for contrast ', contr))
     comparison1 <- stringr::str_split(contr, "_")[[1]][2]
     comparison2 <- stringr::str_split(contr, "_")[[1]][3]
     
@@ -60,7 +60,8 @@ DEGS_scANANSE <- function(seurat_object,
       )
     
     if (file.exists(DEG_file)) {
-      print('skip')
+      message('DEGfile already exist, skipping regenerating the DEG file')
+      message('If new files are needed remove the existing DEG files ')
     } else {
       if (comparison2 == 'average') {
         DEGS <- Seurat::FindMarkers(

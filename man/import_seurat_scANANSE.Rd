@@ -29,5 +29,5 @@ import the influences from a anansnake directory into a seurat object
 \examples{
 sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
 infdir <- system.file("extdata","influence",package = 'AnanseSeurat')
-import_seurat_scANANSE(sce_small, anansnake_inf_dir = infdir)
+sce_small <- import_seurat_scANANSE(sce_small, anansnake_inf_dir = infdir)
 }
