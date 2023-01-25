@@ -6,7 +6,7 @@
 #' @param output_dir directory where the files are outputted
 #' @param RNA_count_assay assay of the seurat object containing the RNA count data
 #' @param cluster_id ID used for finding clusters of cells
-#' @return None, outputs CPM and count files in the output directory
+#' @return None, outputs CPM and counts files in the output directory
 #' @examples
 #' sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
 #' export_CPM_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())

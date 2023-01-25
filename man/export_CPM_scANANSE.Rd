@@ -24,7 +24,7 @@ export_CPM_scANANSE(
 \item{cluster_id}{ID used for finding clusters of cells}
 }
 \value{
-None, outputs CPM and count files in the output directory
+None, outputs CPM and counts files in the output directory
 }
 \description{
 This functions exports CPM values from a seurat object
