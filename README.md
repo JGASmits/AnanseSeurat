@@ -5,6 +5,7 @@
 
 [![R-CMD-check](https://github.com/JGASmits/AnanseSeurat/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JGASmits/AnanseSeurat/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/github/JGASmits/AnanseSeurat/branch/main/graph/badge.svg?token=0XKWAD0KJ7)](https://codecov.io/github/JGASmits/AnanseSeurat)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/AnanseSeurat)](https://cran.r-project.org/package=AnanseSeurat)
 <!-- badges: end -->
 
 The `AnanseSeurat` package takes pre-processed clustered single cell
@@ -87,10 +88,10 @@ anansnake \
 --resources mem_mb=48_000 --cores 12
 ```
 
-### import ANANSE results back to your single-cell object
+### import ANANSE results back to your single cell object
 
-After running Anansnake, you can import the TF influence scores back into
-your single-cell object of choice
+After running Anansnake, you can import the TF influence scores back
+into your single cell object of choice
 
 ``` r
 pbmc <- import_seurat_scANANSE(pbmc,
