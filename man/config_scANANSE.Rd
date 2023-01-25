@@ -6,8 +6,8 @@
 \usage{
 config_scANANSE(
   seurat_object,
+  output_dir,
   min_cells = 50,
-  output_dir = "~/",
   cluster_id = "seurat_clusters",
   genome = "./scANANSE/data/hg38",
   additional_contrasts = "None"
@@ -16,9 +16,9 @@ config_scANANSE(
 \arguments{
 \item{seurat_object}{seurat object}
 
-\item{min_cells}{minimum of cells a cluster needs to be exported}
-
 \item{output_dir}{directory where the files are outputted}
+
+\item{min_cells}{minimum of cells a cluster needs to be exported}
 
 \item{cluster_id}{ID used for finding clusters of cells}
 

@@ -2,15 +2,16 @@
 
 test_that("DEGS are called from the single cell object", {
   #load dummy single cell object
-  sce <- readRDS(testthat::test_path("sce_obj.Rds"))
-  DEG_dir <- paste0(tempdir(), '/deseq2')
-  print(DEG_dir)
-  on.exit(unlink(DEG_dir, recursive = T))
+  outdir <- paste0(tempdir(),'/degs')
   
+  sce <- readRDS(testthat::test_path("sce_obj.Rds"))
+  DEG_dir <- paste0(outdir, '/deseq2')
+  on.exit(unlink(c(DEG_dir,outdir), recursive = T))
+  dir.create(file.path(paste0(outdir)), showWarnings = FALSE)
   DEGS_scANANSE(
     sce,
     min_cells = 2,
-    output_dir = tempdir(),
+    output_dir = outdir,
     cluster_id = 'seurat_clusters',
     RNA_count_assay = "RNA",
     additional_contrasts = list('cluster1_cluster2')

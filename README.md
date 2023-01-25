@@ -87,10 +87,10 @@ anansnake \
 --resources mem_mb=48_000 --cores 12
 ```
 
-### import ANANSE results back to your single cell object
+### import ANANSE results back to your single-cell object
 
-After runing Anansnake, you can import the TF influence scores back into
-your single cell object of chooiche
+After running Anansnake, you can import the TF influence scores back into
+your single-cell object of choice
 
 ``` r
 pbmc <- import_seurat_scANANSE(pbmc,

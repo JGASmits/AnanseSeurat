@@ -230,7 +230,7 @@ per_cluster_df <- function(seurat_object,
   Seurat::Idents(seurat_object) <- cluster_id
   #make a dataframe with the values per cluster:
   clusters <- unique(seurat_object[[cluster_id]])
-
+  
   #check if assay exists
   if (is.null(seurat_object@assays[[assay]])) {
     stop(paste0('assay ', assay, ' not found in the seurat object '))

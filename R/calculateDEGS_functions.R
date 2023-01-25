@@ -14,11 +14,14 @@
 #' DEGS_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 DEGS_scANANSE <- function(seurat_object,
+                          output_dir,
                           min_cells = 50,
-                          output_dir = '~/',
                           cluster_id = 'seurat_clusters',
                           RNA_count_assay = "RNA",
                           additional_contrasts = 'None') {
+  if (missing(output_dir)) {
+    warning('no output_dir specified')
+  }
   dir.create(file.path(paste0(output_dir, '/deseq2/')), showWarnings = FALSE)
   Seurat::Idents(seurat_object) <- cluster_id
   cluster_names <- list()

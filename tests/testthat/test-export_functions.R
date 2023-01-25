@@ -1,9 +1,10 @@
 #test_functions
 
 test_that("CPM & Count files are sucessfully generated", {
-  TPMfile <- paste0(tempdir(), '/TPM.tsv')
-  Countfile <- paste0(tempdir(), '/RNA_Counts.tsv')
-  on.exit(unlink(c(Countfile, TPMfile)))
+  outdir <- paste0(tempdir(),'/CPM')
+  TPMfile <- paste0(outdir, '/TPM.tsv')
+  Countfile <- paste0(outdir, '/RNA_Counts.tsv')
+  on.exit(unlink(c(Countfile, TPMfile, outdir)))
   
   expect_false(file.exists(TPMfile))
   expect_false(file.exists(Countfile))
@@ -14,7 +15,7 @@ test_that("CPM & Count files are sucessfully generated", {
   export_CPM_scANANSE(
     sce,
     min_cells <- 1,
-    output_dir = tempdir(),
+    output_dir = outdir,
     cluster_id = 'seurat_clusters',
     RNA_count_assay = 'RNA'
   )
@@ -33,8 +34,9 @@ test_that("CPM & Count files are sucessfully generated", {
 })
 
 test_that("Peak count matrix file is sucessfully generated", {
-  Peakfile <- paste0(tempdir(), '/Peak_Counts.tsv')
-  on.exit(unlink(c(Peakfile)))
+  outdir <- paste0(tempdir(),'/peaks')
+  Peakfile <- paste0(outdir, '/Peak_Counts.tsv')
+  on.exit(unlink(c(Peakfile, outdir)))
   
   expect_false(file.exists(Peakfile))
   
@@ -44,7 +46,7 @@ test_that("Peak count matrix file is sucessfully generated", {
   export_ATAC_scANANSE(
     sce,
     min_cells <- 1,
-    output_dir = tempdir(),
+    output_dir = outdir,
     cluster_id = 'seurat_clusters',
     ATAC_peak_assay = 'peaks'
   )
@@ -58,10 +60,11 @@ test_that("Peak count matrix file is sucessfully generated", {
 })
 
 test_that("Config and sample file are sucessfully generated", {
-  Configfile <- paste0(tempdir(), '/config.yaml')
-  samplefile <- paste0(tempdir(), '/samplefile.tsv')
+  outdir <- paste0(tempdir(),'/config')
+  Configfile <- paste0(outdir, '/config.yaml')
+  samplefile <- paste0(outdir, '/samplefile.tsv')
   
-  on.exit(unlink(c(Configfile, samplefile)))
+  on.exit(unlink(c(Configfile, samplefile, outdir)))
   
   expect_false(file.exists(Configfile))
   expect_false(file.exists(samplefile))
@@ -76,9 +79,9 @@ test_that("Config and sample file are sucessfully generated", {
   config_scANANSE(
     sce,
     min_cells <- 1,
-    output_dir = tempdir(),
+    output_dir = outdir,
     cluster_id = 'seurat_clusters',
-    genome = paste0(tempdir(), '/hg38'),
+    genome = paste0(outdir, '/hg38'),
     additional_contrasts = contrasts
   )
   
@@ -93,8 +96,9 @@ test_that("Config and sample file are sucessfully generated", {
 })
 
 test_that("Maelstrom count matrix is sucessfully generated", {
-  peakfile <- paste0(tempdir(), '/Peaks_scaled.tsv')
-  on.exit(unlink(c(peakfile)))
+  outdir <- paste0(tempdir(),'/maelstrom')
+  peakfile <- paste0(outdir, '/Peaks_scaled.tsv')
+  on.exit(unlink(c(peakfile,outdir)))
   expect_false(file.exists(peakfile))
   
   #load dummy single cell object
@@ -103,7 +107,7 @@ test_that("Maelstrom count matrix is sucessfully generated", {
   export_ATAC_maelstrom(
     sce,
     min_cells <- 1,
-    output_dir = tempdir(),
+    output_dir = outdir,
     cluster_id = 'seurat_clusters',
     ATAC_peak_assay = 'peaks'
   )

@@ -6,8 +6,8 @@
 \usage{
 export_ATAC_scANANSE(
   seurat_object,
+  output_dir,
   min_cells = 50,
-  output_dir = "~/",
   ATAC_peak_assay = "peaks",
   cluster_id = "seurat_clusters"
 )
@@ -15,9 +15,9 @@ export_ATAC_scANANSE(
 \arguments{
 \item{seurat_object}{object}
 
-\item{min_cells}{minimum of cells a cluster needs to be exported}
-
 \item{output_dir}{directory where the files are outputted}
+
+\item{min_cells}{minimum of cells a cluster needs to be exported}
 
 \item{ATAC_peak_assay}{assay of the seurat object containing the peaks and peakcounts}
 

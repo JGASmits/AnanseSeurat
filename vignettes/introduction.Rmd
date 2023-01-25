@@ -27,8 +27,6 @@ AnanseSeurat requires a preprocessed single cell object. Before exporting data m
 library(AnanseSeurat)
 library(Seurat)
 library(Signac)
-
-knitr::opts_knit$set(root.dir = normalizePath('/ceph/rimlsfnwi/data/moldevbio/zhou/jsmits/scANANSE'))
 ```
 
 In this example we will use a preprocsed 10x PBMC multiome dataset (PBMC from a Healthy Donor (v1, 150x150) Single Cell Multiome ATAC + Gene Expression Dataset by Cell Ranger ARC 2.0.0). This data was pre-processed following the standard pre-processing from Signac. The pre-pocessed single cell object is available at Zenado: <https://zenodo.org/record/7446267/>

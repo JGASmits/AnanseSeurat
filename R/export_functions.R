@@ -12,10 +12,13 @@
 #' export_CPM_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 export_CPM_scANANSE <- function(seurat_object,
+                                output_dir,
                                 min_cells = 50,
-                                output_dir = '~/',
                                 RNA_count_assay = "RNA",
                                 cluster_id = 'seurat_clusters') {
+  if (missing(output_dir)) {
+    stop('no output_dir specified')
+  }
   dir.create(file.path(output_dir), showWarnings = FALSE)
   Seurat::Idents(seurat_object) <- cluster_id
   message('calculating CPM')
@@ -25,6 +28,7 @@ export_CPM_scANANSE <- function(seurat_object,
     normalization.method = 'RC',
     scale.factor = 1e6
   )
+  
   rna_count_lists <- list()
   FPKM_count_lists <- list()
   cluster_names <- list()
@@ -102,10 +106,13 @@ export_CPM_scANANSE <- function(seurat_object,
 #' export_ATAC_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 export_ATAC_scANANSE <- function(seurat_object,
+                                 output_dir,
                                  min_cells = 50,
-                                 output_dir = '~/',
                                  ATAC_peak_assay = "peaks",
                                  cluster_id = 'seurat_clusters') {
+  if (missing(output_dir)) {
+    stop('no output_dir specified')
+  }
   dir.create(file.path(output_dir), showWarnings = FALSE)
   Seurat::Idents(seurat_object) <- cluster_id
   
@@ -172,11 +179,14 @@ export_ATAC_scANANSE <- function(seurat_object,
 #' config_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 config_scANANSE <- function(seurat_object,
+                            output_dir,
                             min_cells = 50,
-                            output_dir = '~/',
                             cluster_id = 'seurat_clusters',
                             genome = './scANANSE/data/hg38',
                             additional_contrasts = 'None') {
+  if (missing(output_dir)) {
+    stop('no output_dir specified')
+  }
   dir.create(file.path(output_dir), showWarnings = FALSE)
   Seurat::Idents(seurat_object) <- cluster_id
   Peak_file <- paste(output_dir, "Peak_Counts.tsv", sep = '/')
@@ -270,12 +280,15 @@ config_scANANSE <- function(seurat_object,
 #' config_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 #' @export
 export_ATAC_maelstrom <- function(seurat_object,
+                                  output_dir,
                                   min_cells = 50,
-                                  output_dir = '~/',
                                   ATAC_peak_assay = "peaks",
                                   cluster_id = 'seurat_clusters',
                                   select_top_rows = TRUE,
                                   n_top_rows = 100000) {
+  if (missing(output_dir)) {
+    stop('no output_dir specified')
+  }
   dir.create(file.path(output_dir), showWarnings = FALSE)
   Seurat::Idents(seurat_object) <- cluster_id
   peak_count_lists <- list()
@@ -324,7 +337,7 @@ export_ATAC_maelstrom <- function(seurat_object,
       row_variance <- apply(activity_matrix, 1, stats::var)
       activity_matrix$RowVar <- row_variance
       activity_matrix <-
-        activity_matrix[order(activity_matrix$RowVar, decreasing = TRUE), ]
+        activity_matrix[order(activity_matrix$RowVar, decreasing = TRUE),]
       activity_matrix <- utils::head(activity_matrix, n_top_rows)
       activity_matrix$RowVar <- NULL
     }

@@ -59,7 +59,8 @@ Maelstrom_Motif2TF <- function(seurat_object,
   }
   
   if ((combine_motifs != 'means') &
-      (combine_motifs != 'max_cor') & (combine_motifs != 'max_var')) {
+      (combine_motifs != 'max_cor') &
+      (combine_motifs != 'max_var')) {
     stop(
       "use either 'max_var', 'max_cor' or 'mav_var' as a selection method to select the most relevant motifs per TF"
     )

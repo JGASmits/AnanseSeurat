@@ -94,7 +94,7 @@ anansnake \
 
 
 ### import ANANSE results back to your single cell object
-After runing Anansnake, you can import the TF influence scores back into your single cell object of chooiche
+After running Anansnake, you can import the TF influence scores back into your single cell object of choice
 ```{r eval=FALSE}
 pbmc <- import_seurat_scANANSE(pbmc,
                                cluster_id = 'predicted.id',

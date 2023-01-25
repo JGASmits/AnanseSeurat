@@ -7,13 +7,12 @@ Authors@R: c(
     person(given =c("Huiqing","Jo"),family ="Zhou", email ="Jo.Zhou@radboudumc.nl", role = c("aut","fnd","cph"),
            comment = c(ORCID = "0000-0002-2434-3986"))
   )
-Description: Enables gene regulatory network analysis on single cell clusters,
-    using the gene regulatory network (GRN) analysis software 
-    'ANANSE', Xu et al.(2021) <doi:10.1093/nar/gkab598>
-    export data from 'Seurat' objects for GRN analysis using 'ANANSE' 
-    implemented in 'snakemake', and incorporates results for visualization 
+Description: Enables gene regulatory network (GRN) analysis on single cell clusters,
+    using the GRN analysis software 'ANANSE', Xu et al.(2021) <doi:10.1093/nar/gkab598>.
+    Export data from 'Seurat' objects, for GRN analysis by 'ANANSE' 
+    implemented in 'snakemake'. Finally, incorporate results for visualization 
     and interpretation.
-License: MIT + file LICENSE
+License: Apache License (>= 2)
 BugReports: https://github.com/JGASmits/AnanseSeurat/issues
 URL: https://github.com/JGASmits/AnanseSeurat/
 Encoding: UTF-8
