@@ -1,0 +1,20 @@
+result_dir: tests/testthat
+rna_samples: tests/testthat/samplefile.tsv
+rna_tpms: tests/testthat/TPM.tsv
+rna_counts: tests/testthat/RNA_Counts.tsv
+atac_samples: tests/testthat/samplefile.tsv
+atac_counts: tests/testthat/Peak_Counts.tsv
+genome: tests/testthat/hg38
+database: gimme.vertebrate.v5.0 
+jaccard: 0.1 
+edges: 500_000 
+padj: 0.05 
+plot_type: "png" 
+get_orthologs: false 
+contrasts: 
+  - "anansesnake_cluster1_average" 
+  - "anansesnake_cluster2_average" 
+  - "anansesnake_cluster3_average" 
+  - "anansesnake_cluster1_cluster2" 
+  - "anansesnake_cluster2_cluster1" 
+  - "anansesnake_cluster3_cluster2" 
