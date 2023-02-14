@@ -8,7 +8,7 @@ import_seurat_scANANSE(
   seurat_object,
   cluster_id = "seurat_clusters",
   anansnake_inf_dir = "None",
-  return_df = F
+  return_df = FALSE
 )
 }
 \arguments{
@@ -20,6 +20,14 @@ import_seurat_scANANSE(
 
 \item{return_df}{return both the seurat object and a dataframe with influence scores as a list}
 }
+\value{
+seurat object with the influence scores addes as an assay
+}
 \description{
 import the influences from a anansnake directory into a seurat object
+}
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+infdir <- system.file("extdata","influence",package = 'AnanseSeurat')
+sce_small <- import_seurat_scANANSE(sce_small, anansnake_inf_dir = infdir)
 }

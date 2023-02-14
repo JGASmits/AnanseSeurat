@@ -6,8 +6,8 @@
 \usage{
 DEGS_scANANSE(
   seurat_object,
+  output_dir,
   min_cells = 50,
-  output_dir = "~/",
   cluster_id = "seurat_clusters",
   RNA_count_assay = "RNA",
   additional_contrasts = "None"
@@ -16,16 +16,24 @@ DEGS_scANANSE(
 \arguments{
 \item{seurat_object}{seurat object}
 
-\item{min_cells}{minimum of cells a cluster needs to be exported}
-
 \item{output_dir}{directory where the files are outputted}
+
+\item{min_cells}{minimum of cells a cluster needs to be exported}
 
 \item{cluster_id}{ID used for finding clusters of cells}
 
 \item{RNA_count_assay}{assay containing the RNA data}
 
-\item{additional_contrasts}{additional contrasts to add between clusters within cluster_ID}
+\item{additional_contrasts}{additional contrasts to add
+between clusters within cluster_ID}
+}
+\value{
+None, outputs DEG files in the output directory
 }
 \description{
 Calculate the differential genes needed for ananse influence
+}
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_obj_tiny.Rds",package = 'AnanseSeurat'))
+DEGS_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 }

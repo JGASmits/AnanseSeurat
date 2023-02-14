@@ -6,8 +6,8 @@
 \usage{
 config_scANANSE(
   seurat_object,
+  output_dir,
   min_cells = 50,
-  output_dir = "~/",
   cluster_id = "seurat_clusters",
   genome = "./scANANSE/data/hg38",
   additional_contrasts = "None"
@@ -16,9 +16,9 @@ config_scANANSE(
 \arguments{
 \item{seurat_object}{seurat object}
 
-\item{min_cells}{minimum of cells a cluster needs to be exported}
-
 \item{output_dir}{directory where the files are outputted}
+
+\item{min_cells}{minimum of cells a cluster needs to be exported}
 
 \item{cluster_id}{ID used for finding clusters of cells}
 
@@ -26,6 +26,13 @@ config_scANANSE(
 
 \item{additional_contrasts}{additional contrasts to add between clusters within cluster_ID}
 }
+\value{
+None, outputs snakemake config file in the output directory
+}
 \description{
 This functions generates a sample file and config file for running Anansnake based on the seurat object
+}
+\examples{
+sce_small <- readRDS(system.file("extdata","sce_small.Rds",package = 'AnanseSeurat'))
+config_scANANSE(sce_small, min_cells = 2, output_dir = tempdir())
 }

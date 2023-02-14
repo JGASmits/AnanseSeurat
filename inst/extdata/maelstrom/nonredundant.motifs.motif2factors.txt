@@ -1,0 +1,16 @@
+# Note: this mapping is specifically created for this non-redundant set of motifs.
+# It also includes factors for motifs that were similar, but this can be
+# specific to this analysis.
+Motif	Factor	Evidence	Curated
+GM.5.0.MotifA	gene1	JASPAR	N
+GM.5.0.MotifA	gene2	Transfac	N
+GM.5.0.MotifB	gene5	Transfac	N
+GM.5.0.MotifB	gene3	SELEX	N
+GM.5.0.MotifC	gene3	SELEX	N
+GM.5.0.MotifC	gene1	SELEX	N
+GM.5.0.MotifD	gene1	JASPAR	N
+GM.5.0.MotifD	gene2	Transfac	N
+GM.5.0.MotifE	gene5	Transfac	N
+GM.5.0.MotifE	gene3	SELEX	N
+GM.5.0.MotifF	gene3	SELEX	N
+GM.5.0.MotifF	gene1	SELEX	N
