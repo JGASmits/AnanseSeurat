@@ -161,7 +161,10 @@ Maelstrom_Motif2TF <- function(seurat_object,
         dplyr::arrange(dplyr::desc(base::abs(m2f_df_match$cor))) %>% dplyr::filter(dplyr::row_number() == 1)
     )
   
+  
   #Select only positive correlations or only negative correlations (repressors)
+  matrix_list <- list()
+  
   for (typeTF in c('MotifTFcor', 'MotifTFanticor')) {
     m2f <- m2f_df_unique
     if (typeTF == 'MotifTFanticor') {
@@ -204,7 +207,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
     if (combine_motifs == 'max_cor') {
       message("Motif best (absolute) correlated to expression is selected per TF")
       ## Using m2f file for selecting highest correlating motif to factor:
-      m2f <- m2f[order(base::abs(m2f[, "cor"]), decreasing = T)]
+      m2f <- m2f[order(base::abs(m2f[, "cor"]), decreasing = T),]
       m2f <-
         m2f[!duplicated(m2f$Factor), c("Factor", "Motif", "cor"), drop = FALSE]
       mot_plot <- mot_plot[match(m2f$Motif, rownames(mot_plot)), ]
@@ -214,7 +217,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
     if (combine_motifs == 'max_var') {
       message("Most variable binding motif is selected per TF")
       ## Using m2f file for selecting highest variable motif to factor:
-      m2f <- m2f[order(base::abs(m2f[, "var"]), decreasing = T)]
+      m2f <- m2f[order(base::abs(m2f[, "var"]), decreasing = T),]
       m2f <- m2f[!duplicated(m2f$Factor), ]
       mot_plot <- mot_plot[match(m2f$Motif, rownames(mot_plot)), ]
       rownames(mot_plot) <- m2f$Factor
@@ -227,13 +230,11 @@ Maelstrom_Motif2TF <- function(seurat_object,
     exp_plot_scale <- t(scale(t(exp_plot)))
     mot_plot_scale <- t(scale(t(mot_plot)))
     
-    matrix_list <- list()
-    matrix_list[["expression"]] <- exp_plot
-    matrix_list[["motif_score"]] <- mot_plot
-    matrix_list[["scaled_expression"]] <- exp_plot_scale
-    matrix_list[["scaled_motif_score"]] <- mot_plot_scale
-    matrix_list[[paste0("tf2motif_selected_", combine_motifs)]] <-
-      m2f
+    matrix_list[[paste0("expression_", typeTF)]] <- exp_plot
+    matrix_list[[paste0("motif_score_", typeTF)]] <- mot_plot
+    matrix_list[[paste0("scaled_expression_", typeTF)]] <- exp_plot_scale
+    matrix_list[[paste0("scaled_motif_score_", typeTF)]] <- mot_plot_scale
+    matrix_list[[paste0("tf2motif_selected_",typeTF, "_", combine_motifs)]] <- m2f
     
     ## Create seurat assay with binding factor assay
     new_assay <-
