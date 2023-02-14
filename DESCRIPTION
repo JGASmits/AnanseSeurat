@@ -29,7 +29,8 @@ Imports:
     rlang,
     Seurat,
     stringr,
-    utils
+    utils,
+    Matrix (>= 1.5.3)
 Suggests: 
     covr,
     knitr,
