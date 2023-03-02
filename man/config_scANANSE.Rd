@@ -10,7 +10,7 @@ config_scANANSE(
   min_cells = 50,
   cluster_id = "seurat_clusters",
   genome = "./scANANSE/data/hg38",
-  additional_contrasts = "None"
+  additional_contrasts = c()
 )
 }
 \arguments{

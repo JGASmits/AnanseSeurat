@@ -88,8 +88,8 @@ export_CPM_scANANSE <- function(seurat_object,
   count_file <- paste(output_dir, "RNA_Counts.tsv", sep = '/')
   CPM_file <- paste(output_dir, "TPM.tsv", sep = '/')
   
-  utils::write.table(count_matrix, count_file, sep = '\t', quote = FALSE)
-  utils::write.table(FPKM_matrix, CPM_file, sep = '\t', quote = FALSE)
+  utils::write.table(as.matrix(count_matrix), count_file, sep = '\t', quote = FALSE)
+  utils::write.table(as.matrix(FPKM_matrix), CPM_file, sep = '\t', quote = FALSE)
   return('done exporting cluster data files')
 }
 #' export_ATAC_scANANSE
@@ -155,9 +155,8 @@ export_ATAC_scANANSE <- function(seurat_object,
   rownames(activity_matrix) <- peaknames
   activity_matrix <- as.data.frame(activity_matrix)
   activity_matrix$average <- round(rowMeans(activity_matrix))
-  
   Peak_file <- paste(output_dir, "Peak_Counts.tsv", sep = '/')
-  utils::write.table(activity_matrix,
+  utils::write.table(as.matrix(activity_matrix),
                      Peak_file,
                      sep = '\t',
                      quote = FALSE)
@@ -183,7 +182,7 @@ config_scANANSE <- function(seurat_object,
                             min_cells = 50,
                             cluster_id = 'seurat_clusters',
                             genome = './scANANSE/data/hg38',
-                            additional_contrasts = 'None') {
+                            additional_contrasts = c()) {
   if (missing(output_dir)) {
     stop('no output_dir specified')
   }
@@ -222,10 +221,10 @@ config_scANANSE <- function(seurat_object,
   )
   #lets generate the snakemake config file
   contrast_list <-
-    as.list(paste0('anansesnake_', cluster_names, '_average'))
-  if (typeof(additional_contrasts) == 'list') {
+    paste0('anansesnake_', cluster_names, '_average')
+  if (length(additional_contrasts)>0){
     message('adding additional contrasts')
-    additional_contrasts <-
+    additional_contrasts <- 
       paste0('anansesnake_', additional_contrasts)
     contrast_list <- c(contrast_list, additional_contrasts)
   }
