@@ -18,6 +18,7 @@ DEGS_scANANSE <- function(seurat_object,
                           min_cells = 50,
                           cluster_id = 'seurat_clusters',
                           RNA_count_assay = "RNA",
+                          genome = './scANANSE/data/hg38',
                           additional_contrasts = 'None') {
   if (missing(output_dir)) {
     warning('no output_dir specified')
@@ -55,7 +56,8 @@ DEGS_scANANSE <- function(seurat_object,
       paste0(
         output_dir,
         '/deseq2/',
-        'hg38-anansesnake_',
+		basename(genome),
+        '-anansesnake_',
         comparison1,
         '_',
         comparison2,
