@@ -10,7 +10,7 @@
 
 The `AnanseSeurat` package takes pre-processed clustered single cell
 objects of scRNAseq and scATACseq or a multiome combination, and
-generates files for gene regulatory network (GRN) analysis.
+generates files for gene regulatory network (GRN) analysis. You canr 
 
 ## Installation
 
@@ -102,6 +102,12 @@ TF_influence <- per_cluster_df(pbmc,
                                assay = 'influence')
 ```
 
+## Citation
+
+> scANANSE gene regulatory network and motif analysis of single-cell clusters [version 1; peer review: awaiting peer review]
+> Jos G.A. Smits, Julian A. Arts, Siebren Frölich, Rebecca R. Snabel, Branco M.H. Heuts, Joost H.A. Martens, Simon J van Heeringen, Huiqing Zhou
+> F1000Research 2023, 12:243 (https://doi.org/10.12688/f1000research.130530.1) 
+
 ### Thanks to:
 
 - Julian A. Arts and his Pycharm equivalent of this package
@@ -112,7 +118,7 @@ TF_influence <- per_cluster_df(pbmc,
   correlation analysis
 - Branco Heuts for testing
 
-# Credits
+### Credits
 
 The hex sticker is generated using the
 [`hexSticker`](https://github.com/GuangchuangYu/hexSticker) package.
