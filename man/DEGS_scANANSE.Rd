@@ -9,6 +9,7 @@ DEGS_scANANSE(
   output_dir,
   min_cells = 50,
   cluster_id = "seurat_clusters",
+  genome = "./scANANSE/data/hg38",
   RNA_count_assay = "RNA",
   additional_contrasts = "None"
 )
@@ -21,6 +22,8 @@ DEGS_scANANSE(
 \item{min_cells}{minimum of cells a cluster needs to be exported}
 
 \item{cluster_id}{ID used for finding clusters of cells}
+
+\item{genome}{genomepy name or location of the genome fastq file}
 
 \item{RNA_count_assay}{assay containing the RNA data}
 
