@@ -17,8 +17,8 @@ DEGS_scANANSE <- function(seurat_object,
                           output_dir,
                           min_cells = 50,
                           cluster_id = 'seurat_clusters',
-                          RNA_count_assay = "RNA",
                           genome = './scANANSE/data/hg38',
+                          RNA_count_assay = "RNA",
                           additional_contrasts = 'None') {
   if (missing(output_dir)) {
     warning('no output_dir specified')
