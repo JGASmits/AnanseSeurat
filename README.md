@@ -10,12 +10,17 @@
 
 The `AnanseSeurat` package takes pre-processed clustered single cell
 objects of scRNAseq and scATACseq or a multiome combination, and
-generates files for gene regulatory network (GRN) analysis. You canr 
+generates files for gene regulatory network (GRN) analysis. It is part 
+of the scANANSE pipeline. <https://doi.org/10.12688/f1000research.130530.1>
 
 ## Installation
 
-`AnanseSeurat` can be installed using
+`AnanseSeurat` can be installed from CRAN using
 
+``` r
+install.packages('AnanseSeurat')
+```
+Or to install the developmental branch from github:
 ``` r
 library(devtools) # Tools to Make Developing R Packages Easier # Tools to Make Developing R Packages Easier
 Sys.unsetenv("GITHUB_PAT")
