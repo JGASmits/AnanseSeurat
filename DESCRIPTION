@@ -1,6 +1,6 @@
 Package: AnanseSeurat
 Title: Construct ANANSE GRN-Analysis Seurat
-Version: 1.1.0
+Version: 1.2.0
 Authors@R: c(
     person(given = "Jos", family ="Smits", email = "Jsmits@science.ru.nl", role = c("aut", "cre","cph"),
            comment = c(ORCID = "0000-0001-5858-3905")),
@@ -17,7 +17,7 @@ BugReports: https://github.com/JGASmits/AnanseSeurat/issues
 URL: https://github.com/JGASmits/AnanseSeurat/
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Imports: 
     dplyr,
     ggplot2,
@@ -30,7 +30,6 @@ Imports:
     Seurat,
     stringr,
     utils,
-    Matrix (>= 1.5.3)
 Suggests: 
     covr,
     knitr,

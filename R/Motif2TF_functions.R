@@ -114,7 +114,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
   
   ## Obtain df with mean expression
   exp_mat <-
-    Seurat::AverageExpression(
+    Seurat::AggregateExpression(
       seurat_object,
       assays = RNA_expression_assay,
       slot = RNA_expression_slot,
@@ -225,7 +225,7 @@ Maelstrom_Motif2TF <- function(seurat_object,
     
     ## order expression matrix and motif matrix the same way
     exp_plot <-
-      exp_mat[match(rownames(mot_plot), rownames(exp_mat)), ]
+      as.matrix(exp_mat[match(rownames(mot_plot), rownames(exp_mat)), ])
     
     exp_plot_scale <- t(scale(t(exp_plot)))
     mot_plot_scale <- t(scale(t(mot_plot)))
@@ -320,12 +320,12 @@ Factor_Motif_Plot <- function(seurat_object,
     TF_name <- names(x$data)[4][[1]]
     motif_name <- TF_motif_table[TF_name, ]$Motif
     x <- x + ggplot2::labs(title = motif_name)
-    x + ggplot2::scale_colour_gradient2(
+    suppressMessages(x + ggplot2::scale_colour_gradient2(
       low = col[1],
       mid = col[2],
       high = col[3],
       midpoint = 0
-    )
+    ))
   })
   plot_Maelstrom <- patchwork::wrap_plots(plot_Maelstrom , ncol = 1)
   plot_logo <- lapply(plot_Maelstrom_raw, function(x) {
@@ -337,5 +337,6 @@ Factor_Motif_Plot <- function(seurat_object,
     ggplot2::ggplot() + ggpubr::background_image(logo_image) #+ ggplot2::coord_fixed()
   })
   plot_logo <- patchwork::wrap_plots(plot_logo, ncol = 1)
+
   return(plot_expression1 | plot_Maelstrom | plot_logo)
 }

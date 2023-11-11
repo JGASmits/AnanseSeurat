@@ -5,6 +5,7 @@
 #' @param min_cells minimum of cells a cluster needs to be exported
 #' @param output_dir directory where the files are outputted
 #' @param cluster_id ID used for finding clusters of cells
+#' @param genome path to the genome folder used for the anansnake config file
 #' @param RNA_count_assay assay containing the RNA data
 #' @param additional_contrasts additional contrasts to add
 #' between clusters within cluster_ID

@@ -23,7 +23,7 @@ DEGS_scANANSE(
 
 \item{cluster_id}{ID used for finding clusters of cells}
 
-\item{genome}{genomepy name or location of the genome fastq file}
+\item{genome}{path to the genome folder used for the anansnake config file}
 
 \item{RNA_count_assay}{assay containing the RNA data}
 

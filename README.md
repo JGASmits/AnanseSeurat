@@ -4,7 +4,7 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/JGASmits/AnanseSeurat/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JGASmits/AnanseSeurat/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/github/JGASmits/AnanseSeurat/branch/main/graph/badge.svg?token=0XKWAD0KJ7)](https://codecov.io/github/JGASmits/AnanseSeurat)
+[![codecov](https://codecov.io/github/JGASmits/AnanseSeurat/branch/main/graph/badge.svg?token=0XKWAD0KJ7)](https://app.codecov.io/github/JGASmits/AnanseSeurat)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/AnanseSeurat)](https://cran.r-project.org/package=AnanseSeurat)
 <!-- badges: end -->
 
