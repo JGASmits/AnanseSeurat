@@ -2,7 +2,7 @@ Package: AnanseSeurat
 Title: Construct ANANSE GRN-Analysis Seurat
 Version: 1.2.0
 Authors@R: c(
-    person(given = "Jos", family ="Smits", email = "Jsmits@science.ru.nl", role = c("aut", "cre","cph"),
+    person(given = "Jos", family ="Smits", email = "Jos.GA.Smits@radboudumc.nl", role = c("aut", "cre","cph"),
            comment = c(ORCID = "0000-0001-5858-3905")),
     person(given =c("Huiqing","Jo"),family ="Zhou", email ="Jo.Zhou@radboudumc.nl", role = c("aut","fnd","cph"),
            comment = c(ORCID = "0000-0002-2434-3986"))
